@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 import 'exercise_entity.dart';
+import 'exercise_target_volume.dart';
 import 'workout_category.dart';
 
 /// Thực thể giáo án bài tập Calisthenics
@@ -49,6 +50,19 @@ class WorkoutTemplateEntity extends Equatable {
     }
     return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
+
+  /// Danh sách chi tiết mục tiêu khối lượng của từng động tác qua tất cả các hiệp
+  /// (thay vì cộng gộp toàn bộ thành một con số chung)
+  List<ExerciseTargetVolume> get exerciseTargetVolumes =>
+      ExerciseTargetVolume.fromExercises(
+        exercises: exercises,
+        targetRounds: targetRounds,
+      );
+
+  /// Chuỗi hiển thị nhanh danh sách mục tiêu từng động tác
+  /// Ví dụ: "Push up: = 50 rep • Plank: = 10 phút"
+  String get exerciseTargetSummaryDisplay =>
+      exerciseTargetVolumes.map((t) => t.summaryLabel).join(' • ');
 
   /// Tổng số rep trong 1 hiệp
   int get totalRepsPerRound =>

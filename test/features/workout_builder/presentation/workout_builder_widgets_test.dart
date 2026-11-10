@@ -61,12 +61,12 @@ void main() {
       expect(find.text('5 Hiệp'), findsOneWidget);
       expect(find.text('Cap: 20 phút'), findsOneWidget);
       expect(find.text('2 Động tác'), findsOneWidget);
-      expect(find.text('Mục tiêu: 25 reps'), findsOneWidget);
-      expect(find.text('Giữ: 2 phút 30 giây'), findsOneWidget);
+      expect(find.text('Muscle-up: = 25 rep'), findsOneWidget);
+      expect(find.text('Handstand Hold: = 2 phút 30 giây'), findsOneWidget);
       expect(find.text('Muscle-up'), findsOneWidget);
-      expect(find.text('5 reps'), findsOneWidget);
+      expect(find.text('= 25 rep'), findsOneWidget);
       expect(find.text('Handstand Hold'), findsOneWidget);
-      expect(find.text('30s hold'), findsOneWidget);
+      expect(find.text('= 2 phút 30 giây'), findsOneWidget);
       expect(find.text('BẮT ĐẦU TẬP'), findsOneWidget);
     });
 
@@ -246,19 +246,21 @@ void main() {
         targetRounds: 5,
       )));
 
-      // Total reps = (20 + 10) * 5 = 150 reps
-      expect(find.text('MỤC TIÊU TOÀN BUỔI TẬP'), findsOneWidget);
-      expect(find.text('Tổng khối lượng qua 5 hiệp tập'), findsOneWidget);
+      // Hiển thị chi tiết từng động tác thay vì cộng gộp
+      expect(find.text('MỤC TIÊU TỪNG ĐỘNG TÁC'), findsOneWidget);
+      expect(find.text('Kết quả đạt được qua 5 hiệp tập'), findsOneWidget);
       expect(find.text('10 SETS'), findsOneWidget); // 2 ex * 5 rounds
-      expect(find.text('TỔNG SỐ REPS'), findsOneWidget);
-      expect(find.text('150'), findsOneWidget);
-      expect(find.text('reps'), findsOneWidget);
-      expect(find.text('30 reps/hiệp × 5 hiệp'), findsOneWidget);
-      // No hold exercises
-      expect(find.text('TỔNG THỜI GIAN GIỮ'), findsNothing);
+      expect(find.text('Push-ups'), findsOneWidget);
+      expect(find.text('= 100 rep'), findsOneWidget);
+      expect(find.text('20 rep/hiệp × 5 hiệp'), findsOneWidget);
+      expect(find.text('Pull-ups'), findsOneWidget);
+      expect(find.text('= 50 rep'), findsOneWidget);
+      expect(find.text('10 rep/hiệp × 5 hiệp'), findsOneWidget);
+      // Không cộng dồn tổng thể thành một số chung
+      expect(find.text('TỔNG SỐ REPS'), findsNothing);
     });
 
-    testWidgets('Calculates total hold seconds converted to minutes across rounds', (tester) async {
+    testWidgets('Calculates total hold seconds converted to minutes per exercise', (tester) async {
       const exercises = [
         ExerciseEntity(
           id: 'e1',
@@ -276,49 +278,77 @@ void main() {
       )));
 
       // Total hold = 30s * 5 = 150s = 2 phút 30 giây
-      expect(find.text('TỔNG THỜI GIAN GIỮ'), findsOneWidget);
-      expect(find.text('2 phút 30 giây'), findsOneWidget);
+      expect(find.text('MỤC TIÊU TỪNG ĐỘNG TÁC'), findsOneWidget);
+      expect(find.text('Handstand Hold'), findsOneWidget);
+      expect(find.text('= 2 phút 30 giây'), findsOneWidget);
       expect(find.text('30s/hiệp × 5 hiệp'), findsOneWidget);
       expect(find.text('5 SETS'), findsOneWidget);
       expect(find.text('TỔNG SỐ REPS'), findsNothing);
     });
 
-    testWidgets('Calculates both reps and hold seconds when workout is mixed', (tester) async {
+    testWidgets('Calculates user specific example: Push up, Pull ups, Plank, Swat hold', (tester) async {
       const exercises = [
         ExerciseEntity(
           id: 'e1',
           workoutId: 'w1',
-          name: 'Dips',
-          defaultReps: 15,
+          name: 'Push up',
+          defaultReps: 10,
           holdSeconds: 0,
           orderIndex: 0,
         ),
         ExerciseEntity(
           id: 'e2',
           workoutId: 'w1',
-          name: 'Plank Hold',
-          defaultReps: 0,
-          holdSeconds: 20,
+          name: 'Pull ups',
+          defaultReps: 20,
+          holdSeconds: 0,
           orderIndex: 1,
+        ),
+        ExerciseEntity(
+          id: 'e3',
+          workoutId: 'w1',
+          name: 'Plank',
+          defaultReps: 0,
+          holdSeconds: 120,
+          orderIndex: 2,
+        ),
+        ExerciseEntity(
+          id: 'e4',
+          workoutId: 'w1',
+          name: 'Swat hold',
+          defaultReps: 0,
+          holdSeconds: 60,
+          orderIndex: 3,
         ),
       ];
 
       await tester.pumpWidget(wrapWidget(const WorkoutTargetSummaryCard(
         exercises: exercises,
-        targetRounds: 3,
+        targetRounds: 5,
       )));
 
-      // Reps: 15 * 3 = 45 reps
-      expect(find.text('TỔNG SỐ REPS'), findsOneWidget);
-      expect(find.text('45'), findsOneWidget);
-      expect(find.text('15 reps/hiệp × 3 hiệp'), findsOneWidget);
+      // Kiểm tra chính xác theo yêu cầu người dùng:
+      // Push up: = 50 rep (10 * 5)
+      expect(find.text('Push up'), findsOneWidget);
+      expect(find.text('= 50 rep'), findsOneWidget);
+      expect(find.text('10 rep/hiệp × 5 hiệp'), findsOneWidget);
 
-      // Hold: 20s * 3 = 60s = 1 phút
-      expect(find.text('TỔNG THỜI GIAN GIỮ'), findsOneWidget);
-      expect(find.text('1 phút'), findsOneWidget);
-      expect(find.text('20s/hiệp × 3 hiệp'), findsOneWidget);
+      // Pull ups: = 100 rep (20 * 5)
+      expect(find.text('Pull ups'), findsOneWidget);
+      expect(find.text('= 100 rep'), findsOneWidget);
+      expect(find.text('20 rep/hiệp × 5 hiệp'), findsOneWidget);
 
-      expect(find.text('6 SETS'), findsOneWidget);
+      // Plank: = 10 phút (120s * 5 = 600s = 10 phút)
+      expect(find.text('Plank'), findsOneWidget);
+      expect(find.text('= 10 phút'), findsOneWidget);
+      expect(find.text('120s/hiệp × 5 hiệp'), findsOneWidget);
+
+      // Swat hold: = 5 phút (60s * 5 = 300s = 5 phút)
+      expect(find.text('Swat hold'), findsOneWidget);
+      expect(find.text('= 5 phút'), findsOneWidget);
+      expect(find.text('60s/hiệp × 5 hiệp'), findsOneWidget);
+
+      expect(find.text('20 SETS'), findsOneWidget);
     });
   });
 }

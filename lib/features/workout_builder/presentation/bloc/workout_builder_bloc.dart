@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../domain/entities/exercise_entity.dart';
+import '../../domain/entities/exercise_target_volume.dart';
 import '../../domain/entities/workout_category.dart';
 import '../../domain/entities/workout_template_entity.dart';
 import '../../domain/repositories/workout_repository.dart';
@@ -192,6 +193,17 @@ class WorkoutBuilderState extends Equatable {
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
     );
   }
+
+  /// Danh sách chi tiết mục tiêu khối lượng của từng động tác qua tất cả các hiệp
+  List<ExerciseTargetVolume> get exerciseTargetVolumes =>
+      ExerciseTargetVolume.fromExercises(
+        exercises: exercises,
+        targetRounds: targetRounds,
+      );
+
+  /// Chuỗi hiển thị nhanh danh sách mục tiêu từng động tác
+  String get exerciseTargetSummaryDisplay =>
+      exerciseTargetVolumes.map((t) => t.summaryLabel).join(' • ');
 
   /// Tổng số rep trong 1 hiệp
   int get totalRepsPerRound =>

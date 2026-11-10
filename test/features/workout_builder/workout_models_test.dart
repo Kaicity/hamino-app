@@ -7,6 +7,7 @@ import 'package:hamino_app/features/history/domain/entities/workout_session_reco
 import 'package:hamino_app/features/workout_builder/data/models/exercise_model.dart';
 import 'package:hamino_app/features/workout_builder/data/models/workout_template_model.dart';
 import 'package:hamino_app/features/workout_builder/domain/entities/exercise_entity.dart';
+import 'package:hamino_app/features/workout_builder/domain/entities/exercise_target_volume.dart';
 import 'package:hamino_app/features/workout_builder/domain/entities/workout_category.dart';
 import 'package:hamino_app/features/workout_builder/domain/entities/workout_template_entity.dart';
 
@@ -154,6 +155,14 @@ void main() {
       expect(workout.totalHoldSecondsAllRounds, 0);
       expect(workout.totalHoldTimeDisplay, '0 giây');
       expect(workout.totalSets, 4);
+
+      // Detailed ExerciseTargetVolumes
+      expect(workout.exerciseTargetVolumes.length, 1);
+      expect(workout.exerciseTargetVolumes.first.exerciseName, 'Push-ups');
+      expect(workout.exerciseTargetVolumes.first.totalReps, 60);
+      expect(workout.exerciseTargetVolumes.first.targetDisplay, '= 60 rep');
+      expect(workout.exerciseTargetVolumes.first.calculationFormula, '15 rep/hiệp × 4 hiệp');
+      expect(workout.exerciseTargetSummaryDisplay, 'Push-ups: = 60 rep');
 
       final holdWorkout = workout.copyWith(
         exercises: const [

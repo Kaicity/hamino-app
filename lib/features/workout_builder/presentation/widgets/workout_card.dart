@@ -242,10 +242,10 @@ class WorkoutCard extends StatelessWidget {
                     workout.hasTimeCap ? 'Cap: ${workout.timeCapDisplay}' : 'Không giới hạn'),
                 _metricChip(
                     Icons.fitness_center_outlined, '${workout.totalExercises} Động tác'),
-                if (workout.totalRepsAllRounds > 0)
-                  _metricChip(Icons.flash_on_rounded, 'Mục tiêu: ${workout.totalRepsAllRounds} reps'),
-                if (workout.totalHoldSecondsAllRounds > 0)
-                  _metricChip(Icons.hourglass_bottom_rounded, 'Giữ: ${workout.totalHoldTimeDisplay}'),
+                ...workout.exerciseTargetVolumes.take(2).map((t) => _metricChip(
+                      t.isStaticHold ? Icons.hourglass_bottom_rounded : Icons.flash_on_rounded,
+                      t.summaryLabel,
+                    )),
               ],
             ),
           ),
@@ -262,6 +262,9 @@ class WorkoutCard extends StatelessWidget {
                 ...workout.exercises.take(3).map((ex) {
                   final isHold = ex.isStaticHold;
                   final badgeColor = isHold ? AppColors.restBlue : AppColors.workGreen;
+                  final totalTargetText = isHold
+                      ? '= ${_formatHoldDuration(ex.holdSeconds * workout.targetRounds)}'
+                      : '= ${ex.defaultReps * workout.targetRounds} rep';
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 8),
                     child: Row(
@@ -301,7 +304,7 @@ class WorkoutCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
-                            ex.targetSummary,
+                            totalTargetText,
                             style: AppTypography.labelSmall.copyWith(
                               color: badgeColor,
                               fontWeight: FontWeight.w700,
@@ -352,6 +355,15 @@ class WorkoutCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _formatHoldDuration(int totalSec) {
+    if (totalSec <= 0) return '0 giây';
+    if (totalSec < 60) return '$totalSec giây';
+    final minutes = totalSec ~/ 60;
+    final seconds = totalSec % 60;
+    if (seconds == 0) return '$minutes phút';
+    return '$minutes phút $seconds giây';
   }
 
   Widget _metricChip(IconData icon, String text) {

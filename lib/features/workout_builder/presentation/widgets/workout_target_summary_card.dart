@@ -3,9 +3,16 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../domain/entities/exercise_entity.dart';
+import '../../domain/entities/exercise_target_volume.dart';
 
-/// Thẻ hiển thị tổng kết khối lượng và mục tiêu của bài tập
-/// Tính toán tổng số rep và tổng số giây giữ (quy đổi ra phút) trên toàn bộ số hiệp
+/// Thẻ hiển thị chi tiết khối lượng mục tiêu cho từng động tác
+/// Thay vì cộng dồn chung các bài tập khác nhau thành 1 số reps tổng thể,
+/// thẻ này liệt kê chi tiết từng động tác đạt được bao nhiêu rep hoặc bao nhiêu phút giữ:
+/// Ví dụ:
+/// - Push up: = 50 rep (10 rep/hiệp × 5 hiệp)
+/// - Pull ups: = 100 rep (20 rep/hiệp × 5 hiệp)
+/// - Plank: = 10 phút (120s/hiệp × 5 hiệp)
+/// - Swat hold: = 5 phút (60s/hiệp × 5 hiệp)
 class WorkoutTargetSummaryCard extends StatelessWidget {
   final List<ExerciseEntity> exercises;
   final int targetRounds;
@@ -15,6 +22,13 @@ class WorkoutTargetSummaryCard extends StatelessWidget {
     required this.exercises,
     required this.targetRounds,
   });
+
+  /// Danh sách chi tiết mục tiêu của từng động tác
+  List<ExerciseTargetVolume> get targetVolumes =>
+      ExerciseTargetVolume.fromExercises(
+        exercises: exercises,
+        targetRounds: targetRounds,
+      );
 
   /// Tổng số rep trong 1 hiệp
   int get totalRepsPerRound =>
@@ -32,7 +46,6 @@ class WorkoutTargetSummaryCard extends StatelessWidget {
       totalHoldSecondsPerRound * targetRounds;
 
   /// Quy đổi tổng số giây giữ thành chuỗi phút / giây dễ hiểu
-  /// Ví dụ: 60s -> "1 phút", 150s -> "2 phút 30 giây", 45s -> "45 giây"
   String get formattedHoldTime {
     final totalSec = totalHoldSecondsAllRounds;
     if (totalSec <= 0) return '0 giây';
@@ -70,7 +83,7 @@ class WorkoutTargetSummaryCard extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                'Thêm động tác để xem tổng số rep và thời gian giữ mục tiêu.',
+                'Thêm động tác để xem chi tiết số rep và thời gian giữ mục tiêu từng động tác.',
                 style: AppTypography.bodySmall.copyWith(
                   color: AppColors.textMuted,
                 ),
@@ -81,8 +94,7 @@ class WorkoutTargetSummaryCard extends StatelessWidget {
       );
     }
 
-    final hasReps = totalRepsAllRounds > 0;
-    final hasHold = totalHoldSecondsAllRounds > 0;
+    final targets = targetVolumes;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -107,7 +119,7 @@ class WorkoutTargetSummaryCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(
-                  Icons.insights_rounded,
+                  Icons.sports_score_rounded,
                   color: AppColors.workGreen,
                   size: 18,
                 ),
@@ -118,7 +130,7 @@ class WorkoutTargetSummaryCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'MỤC TIÊU TOÀN BUỔI TẬP',
+                      'MỤC TIÊU TỪNG ĐỘNG TÁC',
                       style: AppTypography.labelMedium.copyWith(
                         color: AppColors.textWhite,
                         fontWeight: FontWeight.w900,
@@ -126,7 +138,7 @@ class WorkoutTargetSummaryCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      'Tổng khối lượng qua $targetRounds hiệp tập',
+                      'Kết quả đạt được qua $targetRounds hiệp tập',
                       style: AppTypography.bodySmall.copyWith(
                         color: AppColors.textMuted,
                         fontSize: 11,
@@ -158,128 +170,109 @@ class WorkoutTargetSummaryCard extends StatelessWidget {
           const Divider(height: 1, color: AppColors.borderDark),
           const SizedBox(height: 14),
 
-          // ── Metric Tiles ──────────────────────────────────────────────────
-          Row(
-            children: [
-              // Cột 1: Tổng số Reps
-              if (hasReps)
-                Expanded(
-                  child: _metricTile(
-                    title: 'TỔNG SỐ REPS',
-                    value: '$totalRepsAllRounds',
-                    unit: 'reps',
-                    subtitle:
-                        '$totalRepsPerRound reps/hiệp × $targetRounds hiệp',
-                    color: AppColors.workGreen,
-                    icon: Icons.repeat_rounded,
+          // ── Danh sách chi tiết mục tiêu từng động tác ──────────────────────
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: targets.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 8),
+            itemBuilder: (context, index) {
+              final target = targets[index];
+              final isHold = target.isStaticHold;
+              final accentColor =
+                  isHold ? AppColors.restBlue : AppColors.workGreen;
+
+              return Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceDark,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: accentColor.withValues(alpha: 0.25),
+                    width: 1,
                   ),
                 ),
+                child: Row(
+                  children: [
+                    // Icon đại diện
+                    Container(
+                      width: 34,
+                      height: 34,
+                      decoration: BoxDecoration(
+                        color: accentColor.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        isHold
+                            ? Icons.timer_outlined
+                            : Icons.fitness_center_rounded,
+                        color: accentColor,
+                        size: 17,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
 
-              if (hasReps && hasHold)
-                Container(
-                  width: 1,
-                  height: 54,
-                  margin: const EdgeInsets.symmetric(horizontal: 12),
-                  color: AppColors.borderDark,
-                ),
+                    // Tên động tác và công thức tính
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            target.exerciseName,
+                            style: AppTypography.headlineSmall.copyWith(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textWhite,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            target.calculationFormula,
+                            style: AppTypography.bodySmall.copyWith(
+                              color: AppColors.textMuted,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
 
-              // Cột 2: Tổng thời gian giữ
-              if (hasHold)
-                Expanded(
-                  child: _metricTile(
-                    title: 'TỔNG THỜI GIAN GIỮ',
-                    value: formattedHoldTime,
-                    unit: '',
-                    subtitle:
-                        '${totalHoldSecondsPerRound}s/hiệp × $targetRounds hiệp',
-                    color: AppColors.restBlue,
-                    icon: Icons.timer_outlined,
-                  ),
-                ),
+                    const SizedBox(width: 8),
 
-              // Nếu chỉ có 1 trong 2 hoặc không có cả 2
-              if (!hasHold && !hasReps)
-                Expanded(
-                  child: Text(
-                    'Chưa có dữ liệu số rep hoặc giây giữ',
-                    style: AppTypography.bodyMedium
-                        .copyWith(color: AppColors.textMuted),
-                  ),
+                    // Kết quả mục tiêu nổi bật: vd "= 50 rep", "= 10 phút"
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: accentColor.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: accentColor.withValues(alpha: 0.45),
+                          width: 1.2,
+                        ),
+                      ),
+                      child: Text(
+                        target.targetDisplay,
+                        style: AppTypography.labelLarge.copyWith(
+                          color: accentColor,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 13,
+                          letterSpacing: 0.2,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-            ],
+              );
+            },
           ),
         ],
       ),
     );
   }
-
-  Widget _metricTile({
-    required String title,
-    required String value,
-    required String unit,
-    required String subtitle,
-    required Color color,
-    required IconData icon,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(icon, size: 14, color: color),
-            const SizedBox(width: 4),
-            Text(
-              title,
-              style: AppTypography.labelSmall.copyWith(
-                color: color,
-                fontSize: 10,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 0.8,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.baseline,
-          textBaseline: TextBaseline.alphabetic,
-          children: [
-            Flexible(
-              child: Text(
-                value,
-                style: AppTypography.headlineLarge.copyWith(
-                  color: AppColors.textWhite,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w900,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            if (unit.isNotEmpty) ...[
-              const SizedBox(width: 4),
-              Text(
-                unit,
-                style: AppTypography.labelMedium.copyWith(
-                  color: AppColors.textMuted,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ],
-        ),
-        const SizedBox(height: 2),
-        Text(
-          subtitle,
-          style: AppTypography.bodySmall.copyWith(
-            color: AppColors.textMuted,
-            fontSize: 11,
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ],
-    );
-  }
 }
-
