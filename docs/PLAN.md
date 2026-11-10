@@ -50,7 +50,7 @@
 ## 2. CHECKLIST TIẾN ĐỘ TỔNG HỢP (MASTER PROGRESS TRACKER)
 
 - [x] **Phase 0:** Khởi tạo Nền tảng, Thư viện & Core Architecture *(4/4 Tasks - 14/14 Checklist Items)*
-- [ ] **Phase 1:** Cơ sở dữ liệu Cục bộ & Preset Mẫu Calisthenics *(0/4 Tasks - 0/16 Checklist Items)*
+- [x] **Phase 1:** Cơ sở dữ liệu Cục bộ & Preset Mẫu Calisthenics *(4/4 Tasks - 16/16 Checklist Items)*
 - [ ] **Phase 2:** Quản lý & Trình tạo Bài tập (Workout Builder CRUD) *(0/4 Tasks - 0/16 Checklist Items)*
 - [ ] **Phase 3:** Bộ đếm giờ Chuẩn xác & Màn hình Tập luyện (Timer Engine & UI) *(0/5 Tasks - 0/18 Checklist Items)*
 - [ ] **Phase 4:** Hệ thống Giọng nói Thông minh (TTS) & Âm thanh (Audio Coach) *(0/4 Tasks - 0/15 Checklist Items)*
@@ -130,47 +130,47 @@
 | **TASK-1.4** | Thư viện Bài tập Mẫu (Presets) | Seed dữ liệu 4 giáo án Calisthenics chuẩn khi mở app lần đầu. | Cài app mới là có sẵn 4 bài mẫu chuẩn để tập ngay. | P1 |
 
 #### Checklist Chi Tiết Thực Hiện (Action Items)
-- [ ] **TASK-1.1: Định nghĩa Domain Entities & Data Models**
-  - [ ] Tạo enum `WorkoutCategory` (`emom`, `endurance`, `skill`, `cardio`) có helper lấy nhãn tiếng Việt và màu sắc đại diện.
-  - [ ] Tạo Entity `ExerciseEntity` và Data Model `ExerciseModel` (`id`, `workoutId`, `name`, `defaultReps`, `holdSeconds`, `orderIndex`, `notes`) hỗ trợ `toMap()` & `fromMap()`.
-  - [ ] Tạo Entity `WorkoutTemplateEntity` và Data Model `WorkoutTemplateModel` (`id`, `name`, `category`, `description`, `prepareSeconds`, `defaultRestSeconds`, `timeCapSeconds`, `targetRounds`, `isPreset`, `isFavorite`, `createdAt`, `exercises`).
-  - [ ] Tạo Entity & Model `WorkoutSessionRecord` (`id`, `workoutId`, `workoutName`, `startedAt`, `finishedAt`, `durationSeconds`, `completedRounds`, `rpeScore`, `notes`).
-  - [ ] Thêm phương thức `copyWith()` cho tất cả các model để phục vụ State Management.
+- [x] **TASK-1.1: Định nghĩa Domain Entities & Data Models**
+  - [x] Tạo enum `WorkoutCategory` (`emom`, `endurance`, `skill`, `cardio`) có helper lấy nhãn tiếng Việt và màu sắc đại diện.
+  - [x] Tạo Entity `ExerciseEntity` và Data Model `ExerciseModel` (`id`, `workoutId`, `name`, `defaultReps`, `holdSeconds`, `orderIndex`, `notes`) hỗ trợ `toMap()` & `fromMap()`.
+  - [x] Tạo Entity `WorkoutTemplateEntity` và Data Model `WorkoutTemplateModel` (`id`, `name`, `category`, `description`, `prepareSeconds`, `defaultRestSeconds`, `timeCapSeconds`, `targetRounds`, `isPreset`, `isFavorite`, `createdAt`, `exercises`).
+  - [x] Tạo Entity & Model `WorkoutSessionRecord` (`id`, `workoutId`, `workoutName`, `startedAt`, `finishedAt`, `durationSeconds`, `completedRounds`, `rpeScore`, `notes`).
+  - [x] Thêm phương thức `copyWith()` cho tất cả các model để phục vụ State Management.
 
-- [ ] **TASK-1.2: Thiết kế & Cấu hình Database Helper (SQLite)**
-  - [ ] Tạo `lib/core/database/database_helper.dart` quản lý kết nối cơ sở dữ liệu `hamino_workout.db`.
-  - [ ] Viết câu lệnh DDL tạo bảng `workouts`:
+- [x] **TASK-1.2: Thiết kế & Cấu hình Database Helper (SQLite)**
+  - [x] Tạo `lib/core/database/database_helper.dart` quản lý kết nối cơ sở dữ liệu `hamino_workout.db`.
+  - [x] Viết câu lệnh DDL tạo bảng `workouts`:
     - `id TEXT PRIMARY KEY`, `name TEXT NOT NULL`, `category TEXT NOT NULL`
     - `description TEXT`, `prepare_seconds INTEGER DEFAULT 10`
     - `default_rest_seconds INTEGER DEFAULT 60`, `time_cap_seconds INTEGER DEFAULT 0`
     - `target_rounds INTEGER DEFAULT 1`, `is_preset INTEGER DEFAULT 0`
     - `is_favorite INTEGER DEFAULT 0`, `created_at TEXT NOT NULL`
-  - [ ] Viết câu lệnh DDL tạo bảng `exercises`:
+  - [x] Viết câu lệnh DDL tạo bảng `exercises`:
     - `id TEXT PRIMARY KEY`, `workout_id TEXT NOT NULL`
     - `name TEXT NOT NULL`, `default_reps INTEGER DEFAULT 10`
     - `hold_seconds INTEGER DEFAULT 0`, `order_index INTEGER NOT NULL`
     - `notes TEXT`, `FOREIGN KEY (workout_id) REFERENCES workouts (id) ON DELETE CASCADE`
-  - [ ] Viết câu lệnh DDL tạo bảng `workout_sessions` ghi nhận lịch sử tập luyện.
-  - [ ] Tạo chỉ mục (Index) trên cột `workout_id` của bảng `exercises` để tăng tốc độ truy vấn.
+  - [x] Viết câu lệnh DDL tạo bảng `workout_sessions` ghi nhận lịch sử tập luyện.
+  - [x] Tạo chỉ mục (Index) trên cột `workout_id` của bảng `exercises` để tăng tốc độ truy vấn.
 
-- [ ] **TASK-1.3: Hiện thực Repository Pattern cho Workout**
-  - [ ] Tạo interface `WorkoutRepository` trong tầng Domain (`lib/features/workout_builder/domain/repositories/workout_repository.dart`).
-  - [ ] Hiện thực `WorkoutRepositoryImpl` trong tầng Data:
-    - [ ] `Future<List<WorkoutTemplateModel>> getAllWorkouts()` (kèm danh sách bài tập exercises con).
-    - [ ] `Future<List<WorkoutTemplateModel>> getWorkoutsByCategory(WorkoutCategory category)`.
-    - [ ] `Future<WorkoutTemplateModel?> getWorkoutById(String id)`.
-    - [ ] `Future<void> saveWorkout(WorkoutTemplateModel workout)` (hỗ trợ cả Insert và Update trong một Transaction).
-    - [ ] `Future<void> deleteWorkout(String id)`.
-    - [ ] `Future<void> toggleFavorite(String id, bool isFavorite)`.
-  - [ ] Đăng ký `DatabaseHelper` và `WorkoutRepository` vào GetIt DI.
+- [x] **TASK-1.3: Hiện thực Repository Pattern cho Workout**
+  - [x] Tạo interface `WorkoutRepository` trong tầng Domain (`lib/features/workout_builder/domain/repositories/workout_repository.dart`).
+  - [x] Hiện thực `WorkoutRepositoryImpl` trong tầng Data:
+    - [x] `Future<List<WorkoutTemplateModel>> getAllWorkouts()` (kèm danh sách bài tập exercises con).
+    - [x] `Future<List<WorkoutTemplateModel>> getWorkoutsByCategory(WorkoutCategory category)`.
+    - [x] `Future<WorkoutTemplateModel?> getWorkoutById(String id)`.
+    - [x] `Future<void> saveWorkout(WorkoutTemplateModel workout)` (hỗ trợ cả Insert và Update trong một Transaction).
+    - [x] `Future<void> deleteWorkout(String id)`.
+    - [x] `Future<void> toggleFavorite(String id, bool isFavorite)`.
+  - [x] Đăng ký `DatabaseHelper` và `WorkoutRepository` vào GetIt DI.
 
-- [ ] **TASK-1.4: Xây dựng Thư viện Giáo án Calisthenics Mẫu (Preset Seed Data)**
-  - [ ] Tạo file `lib/core/database/preset_workouts_data.dart` chứa danh sách 4 bài tập mẫu:
-    - [ ] **Preset 1 (EMOM):** "EMOM 20m Beast" - 5 rounds, 4 bài (Phút 1: Pull-up 10 reps; Phút 2: Push-up 20 reps; Phút 3: Dips 15 reps; Phút 4: Rest 60s).
-    - [ ] **Preset 2 (Endurance):** "Endurance 30m Circuit" - 5 rounds, 4 bài (Pull-ups 8 reps, Dips 12 reps, Australian Rows 12 reps, Bodyweight Squats 20 reps, Rest giữa hiệp 90s, Time Cap 30 phút).
-    - [ ] **Preset 3 (Skill):** "Skill Handstand Mastery" - 6 rounds (Handstand Wall Hold 20s, Rest 90s, Pike Push-ups 8 reps, Rest 90s).
-    - [ ] **Preset 4 (Cardio):** "Cardio HIIT Tabata" - 8 rounds (Burpees 20s Work / 10s Rest).
-  - [ ] Viết logic tự động chèn 4 presets vào SQLite trong callback `onCreate` của `DatabaseHelper`.
+- [x] **TASK-1.4: Xây dựng Thư viện Giáo án Calisthenics Mẫu (Preset Seed Data)**
+  - [x] Tạo file `lib/core/database/preset_workouts_data.dart` chứa danh sách 4 bài tập mẫu:
+    - [x] **Preset 1 (EMOM):** "EMOM 20m Beast" - 5 rounds, 4 bài (Phút 1: Pull-up 10 reps; Phút 2: Push-up 20 reps; Phút 3: Dips 15 reps; Phút 4: Rest 60s).
+    - [x] **Preset 2 (Endurance):** "Endurance 30m Circuit" - 5 rounds, 4 bài (Pull-ups 8 reps, Dips 12 reps, Australian Rows 12 reps, Bodyweight Squats 20 reps, Rest giữa hiệp 90s, Time Cap 30 phút).
+    - [x] **Preset 3 (Skill):** "Skill Handstand Mastery" - 6 rounds (Handstand Wall Hold 20s, Rest 90s, Pike Push-ups 8 reps, Rest 90s).
+    - [x] **Preset 4 (Cardio):** "Cardio HIIT Tabata" - 8 rounds (Burpees 20s Work / 10s Rest).
+  - [x] Viết logic tự động chèn 4 presets vào SQLite trong callback `onCreate` của `DatabaseHelper`.
 
 ---
 
