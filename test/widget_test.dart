@@ -1,4 +1,4 @@
-import 'dart:ui';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hamino_app/core/database/preset_workouts_data.dart';
 import 'package:hamino_app/core/di/injection_container.dart';
@@ -6,13 +6,15 @@ import 'package:hamino_app/core/utils/time_formatter.dart';
 import 'package:hamino_app/features/workout_builder/domain/entities/workout_category.dart';
 import 'package:hamino_app/features/workout_builder/domain/entities/workout_template_entity.dart';
 import 'package:hamino_app/features/workout_builder/domain/repositories/workout_repository.dart';
+import 'package:hamino_app/features/workout_builder/presentation/bloc/workout_builder_bloc.dart';
+import 'package:hamino_app/features/workout_builder/presentation/bloc/workout_catalog_bloc.dart';
 import 'package:hamino_app/main.dart';
 
 class FakeWorkoutRepository implements WorkoutRepository {
   List<WorkoutTemplateEntity> workouts = List.from(PresetWorkoutsData.presets);
 
   @override
-  Future<List<WorkoutTemplateEntity>> getAllWorkouts() async => workouts;
+  Future<List<WorkoutTemplateEntity>> getAllWorkouts() async => List.from(workouts);
 
   @override
   Future<List<WorkoutTemplateEntity>> getWorkoutsByCategory(WorkoutCategory category) async {
@@ -55,31 +57,69 @@ void main() {
   setUp(() async {
     await sl.reset();
     sl.registerLazySingleton<WorkoutRepository>(() => FakeWorkoutRepository());
+    sl.registerFactory(() => WorkoutCatalogBloc(sl<WorkoutRepository>()));
+    sl.registerFactory(() => WorkoutBuilderBloc(sl<WorkoutRepository>()));
   });
 
   tearDown(() async {
     await sl.reset();
   });
 
-  group('Hamino Workout Phase 1 Smoke & Widget Tests', () {
-    testWidgets('App renders branding, Phase 1 banner and loads preset workouts',
+  group('Hamino Workout Phase 2 Smoke & Catalog Widget Tests', () {
+    testWidgets('App renders branding, catalog title, filter chips and preset cards',
         (WidgetTester tester) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
 
       await tester.pumpWidget(const HaminoApp());
-      // Cho phép microtasks hoàn tất việc tải danh sách bài tập từ repository
-      await tester.pump();
-      await tester.pump();
+      await tester.pumpAndSettle();
 
+      // Header Branding
       expect(find.text('HAMINO'), findsOneWidget);
       expect(find.text('WORKOUT'), findsOneWidget);
-      expect(find.text('PHASE 1 HOÀN TẤT'), findsOneWidget);
-      expect(find.text('GIÁO ÁN CALISTHENICS (4)'), findsOneWidget);
+
+      // Section titles
+      expect(find.text('THƯ VIỆN BÀI TẬP'), findsOneWidget);
+      expect(find.text('LỌC THEO THỂ LOẠI'), findsOneWidget);
+
+      // Filter chips
+      expect(find.text('TẤT CẢ'), findsOneWidget);
+      expect(find.text('EMOM'), findsAtLeastNWidgets(1));
+      expect(find.text('ENDURANCE'), findsAtLeastNWidgets(1));
+      expect(find.text('SKILL'), findsAtLeastNWidgets(1));
+      expect(find.text('CARDIO'), findsAtLeastNWidgets(1));
+
+      // Preset workout cards
       expect(find.text('EMOM 20m Beast'), findsOneWidget);
       expect(find.text('Endurance 30m Circuit'), findsOneWidget);
       expect(find.text('Skill Handstand Mastery'), findsOneWidget);
+      expect(find.text('Cardio HIIT Tabata'), findsOneWidget);
+
+      // Quick start button
+      expect(find.text('BẮT ĐẦU TẬP'), findsAtLeastNWidgets(1));
+
+      // FAB "+" to create new workout
+      expect(find.byType(FloatingActionButton), findsOneWidget);
+    });
+
+    testWidgets('Tapping category filter chip filters workouts list',
+        (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(const HaminoApp());
+      await tester.pumpAndSettle();
+
+      // Find chip EMOM and tap
+      final emomChip = find.text('EMOM').first;
+      await tester.tap(emomChip);
+      await tester.pumpAndSettle();
+
+      expect(find.text('1 BÀI TẬP'), findsOneWidget);
+      expect(find.text('EMOM 20m Beast'), findsOneWidget);
+      expect(find.text('Endurance 30m Circuit'), findsNothing);
     });
 
     test('TimeFormatter formats seconds correctly', () {

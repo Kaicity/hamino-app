@@ -51,7 +51,7 @@
 
 - [x] **Phase 0:** Khởi tạo Nền tảng, Thư viện & Core Architecture *(4/4 Tasks - 14/14 Checklist Items)*
 - [x] **Phase 1:** Cơ sở dữ liệu Cục bộ & Preset Mẫu Calisthenics *(4/4 Tasks - 16/16 Checklist Items)*
-- [ ] **Phase 2:** Quản lý & Trình tạo Bài tập (Workout Builder CRUD) *(0/4 Tasks - 0/16 Checklist Items)*
+- [x] **Phase 2:** Quản lý & Trình tạo Bài tập (Workout Builder CRUD) *(4/4 Tasks - 16/16 Checklist Items)*
 - [ ] **Phase 3:** Bộ đếm giờ Chuẩn xác & Màn hình Tập luyện (Timer Engine & UI) *(0/5 Tasks - 0/18 Checklist Items)*
 - [ ] **Phase 4:** Hệ thống Giọng nói Thông minh (TTS) & Âm thanh (Audio Coach) *(0/4 Tasks - 0/15 Checklist Items)*
 - [ ] **Phase 5:** Wakelock, Chạy nền & Lịch sử Tập luyện *(0/4 Tasks - 0/14 Checklist Items)*
@@ -186,40 +186,40 @@
 | **TASK-2.4** | Quản lý Động tác trong bài | Thêm, sửa, xóa, kéo thả sắp xếp bài tập (`ReorderableListView`). | Kéo thả đổi thứ tự bài tập mượt mà, lưu DB chính xác. | P1 |
 
 #### Checklist Chi Tiết Thực Hiện (Action Items)
-- [ ] **TASK-2.1: Màn hình Danh mục Bài tập (Catalog UI & State)**
-  - [ ] Tạo `WorkoutCatalogBloc` / `Cubit` với các State: `CatalogLoading`, `CatalogLoaded`, `CatalogError`.
-  - [ ] Xây dựng thanh Category Filter Chips nằm ngang: "Tất cả", "EMOM", "Endurance", "Skill", "Cardio".
-  - [ ] Hiện thực logic lọc danh sách bài tập tương ứng khi người dùng bấm vào chip.
-  - [ ] Thiết kế `EmptyStateWidget` thể thao khi một danh mục chưa có bài tập nào.
-  - [ ] Đặt Floating Action Button "+" nổi bật để chuyển sang màn hình Builder.
+- [x] **TASK-2.1: Màn hình Danh mục Bài tập (Catalog UI & State)**
+  - [x] Tạo `WorkoutCatalogBloc` / `Cubit` với các State: `CatalogLoading`, `CatalogLoaded`, `CatalogError`.
+  - [x] Xây dựng thanh Category Filter Chips nằm ngang: "Tất cả", "EMOM", "Endurance", "Skill", "Cardio".
+  - [x] Hiện thực logic lọc danh sách bài tập tương ứng khi người dùng bấm vào chip.
+  - [x] Thiết kế `EmptyStateWidget` thể thao khi một danh mục chưa có bài tập nào.
+  - [x] Đặt Floating Action Button "+" nổi bật để chuyển sang màn hình Builder.
 
-- [ ] **TASK-2.2: Thiết kế Thẻ Bài tập (WorkoutCard Widget)**
-  - [ ] Tạo widget `WorkoutCard` hiển thị:
+- [x] **TASK-2.2: Thiết kế Thẻ Bài tập (WorkoutCard Widget)**
+  - [x] Tạo widget `WorkoutCard` hiển thị:
     - Badge thể loại với màu đặc trưng riêng biệt (EMOM: Cam, Endurance: Xanh lá, Skill: Tím, Cardio: Đỏ).
     - Tên bài tập (In đậm, rõ nét).
     - Thông số tổng quan: Giới hạn thời gian (VD: `Cap: 20m` hoặc `No Cap`), Số hiệp (`5 rounds`), Số lượng động tác (`4 động tác`).
-  - [ ] Nút action chính: "Bắt đầu tập" (Quick Start Button) điều hướng trực tiếp sang màn hình Player.
-  - [ ] Nút ngôi sao yêu thích (Favorite Toggle) gọi repository cập nhật tức thì.
-  - [ ] Menu 3 chấm (Popup Menu): Chỉnh sửa (Edit), Nhân bản (Duplicate), Xóa (Delete) có hộp thoại xác nhận.
+  - [x] Nút action chính: "Bắt đầu tập" (Quick Start Button) điều hướng trực tiếp sang màn hình Player.
+  - [x] Nút ngôi sao yêu thích (Favorite Toggle) gọi repository cập nhật tức thì.
+  - [x] Menu 3 chấm (Popup Menu): Chỉnh sửa (Edit), Nhân bản (Duplicate), Xóa (Delete) có hộp thoại xác nhận.
 
-- [ ] **TASK-2.3: Xây dựng Form Tạo / Chỉnh sửa Bài tập (Workout Builder UI)**
-  - [ ] Tạo `WorkoutBuilderBloc` quản lý trạng thái form tạo/chỉnh sửa.
-  - [ ] Thiết kế Input Tên bài tập (bắt buộc, tối thiểu 3 ký tự).
-  - [ ] SegmentedButton hoặc ChoiceChips chọn thể loại (`WorkoutCategory`).
-  - [ ] Bộ chọn thời gian chuẩn bị (Prepare Time): 5s, 10s, 15s.
-  - [ ] Bộ chọn thời gian nghỉ mặc định (Default Rest): 30s, 60s, 90s, 120s, 180s.
-  - [ ] Cài đặt Giới hạn thời gian (Time Cap): Switch bật/tắt giới hạn + Slider chọn 10, 15, 20, 30, 45, 60 phút.
-  - [ ] Cài đặt Số hiệp mục tiêu (Target Rounds): Bộ đếm tăng/giảm từ 1 đến 30 hiệp.
+- [x] **TASK-2.3: Xây dựng Form Tạo / Chỉnh sửa Bài tập (Workout Builder UI)**
+  - [x] Tạo `WorkoutBuilderBloc` quản lý trạng thái form tạo/chỉnh sửa.
+  - [x] Thiết kế Input Tên bài tập (bắt buộc, tối thiểu 3 ký tự).
+  - [x] SegmentedButton hoặc ChoiceChips chọn thể loại (`WorkoutCategory`).
+  - [x] Bộ chọn thời gian chuẩn bị (Prepare Time): 5s, 10s, 15s.
+  - [x] Bộ chọn thời gian nghỉ mặc định (Default Rest): 30s, 60s, 90s, 120s, 180s.
+  - [x] Cài đặt Giới hạn thời gian (Time Cap): Switch bật/tắt giới hạn + Slider chọn 10, 15, 20, 30, 45, 60 phút.
+  - [x] Cài đặt Số hiệp mục tiêu (Target Rounds): Bộ đếm tăng/giảm từ 1 đến 30 hiệp.
 
-- [ ] **TASK-2.4: Quản lý Danh sách Động tác (Exercise List Manager)**
-  - [ ] Tích hợp `ReorderableListView` cho phép kéo thả sắp xếp thứ tự động tác trong bài.
-  - [ ] Xây dựng Dialog / Modal BottomSheet thêm mới động tác:
+- [x] **TASK-2.4: Quản lý Danh sách Động tác (Exercise List Manager)**
+  - [x] Tích hợp `ReorderableListView` cho phép kéo thả sắp xếp thứ tự động tác trong bài.
+  - [x] Xây dựng Dialog / Modal BottomSheet thêm mới động tác:
     - Ô nhập Tên động tác (VD: "Kéo xà đơn - Pull-up").
     - Toggle chọn chế độ: Theo số lần (Reps) hoặc Theo thời gian giữ (Hold Seconds).
     - Ô nhập số Reps (mặc định 10) hoặc số giây Hold (VD: 20s).
     - Ghi chú kỹ thuật ngắn (tùy chọn).
-  - [ ] Thao tác vuốt để xóa (Dismissible) hoặc nút thùng rác xóa từng động tác.
-  - [ ] Nút "Lưu bài tập": Kiểm tra điều kiện bài tập phải có ít nhất 1 động tác, lưu vào SQLite và quay lại kèm SnackBar thành công.
+  - [x] Thao tác vuốt để xóa (Dismissible) hoặc nút thùng rác xóa từng động tác.
+  - [x] Nút "Lưu bài tập": Kiểm tra điều kiện bài tập phải có ít nhất 1 động tác, lưu vào SQLite và quay lại kèm SnackBar thành công.
 
 ---
 

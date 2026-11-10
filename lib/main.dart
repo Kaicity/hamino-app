@@ -9,6 +9,7 @@ import 'core/theme/app_typography.dart';
 import 'features/workout_builder/domain/entities/workout_category.dart';
 import 'features/workout_builder/domain/entities/workout_template_entity.dart';
 import 'features/workout_builder/domain/repositories/workout_repository.dart';
+import 'features/workout_builder/presentation/pages/workout_catalog_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,7 +46,7 @@ class HaminoApp extends StatelessWidget {
       title: AppConstants.appName,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
-      home: const HomeScreen(),
+      home: const WorkoutCatalogPage(),
     );
   }
 }

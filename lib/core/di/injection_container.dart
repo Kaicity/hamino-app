@@ -3,6 +3,8 @@ import 'package:get_it/get_it.dart';
 import '../database/database_helper.dart';
 import '../../features/workout_builder/data/repositories/workout_repository_impl.dart';
 import '../../features/workout_builder/domain/repositories/workout_repository.dart';
+import '../../features/workout_builder/presentation/bloc/workout_catalog_bloc.dart';
+import '../../features/workout_builder/presentation/bloc/workout_builder_bloc.dart';
 
 /// Service Locator toàn cục của ứng dụng
 final sl = GetIt.instance;
@@ -37,6 +39,10 @@ Future<void> _initWorkoutBuilder() async {
   sl.registerLazySingleton<WorkoutRepository>(
     () => WorkoutRepositoryImpl(sl<DatabaseHelper>()),
   );
+
+  // BLoCs (factory - mỗi lần dùng cần instance mới)
+  sl.registerFactory(() => WorkoutCatalogBloc(sl<WorkoutRepository>()));
+  sl.registerFactory(() => WorkoutBuilderBloc(sl<WorkoutRepository>()));
 }
 
 /// Đăng ký dependencies cho tính năng Workout Player (Đồng hồ đếm giờ & Trạng thái tập)
