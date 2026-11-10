@@ -8,6 +8,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../widgets/empty_state_widget.dart';
 import '../widgets/workout_card.dart';
+import '../../../../features/workout_player/presentation/pages/workout_player_page.dart';
 import 'workout_builder_page.dart';
 
 /// Màn hình danh sách bài tập - màn hình chính của ứng dụng
@@ -297,18 +298,10 @@ class _WorkoutCatalogView extends StatelessWidget {
                             child: WorkoutCard(
                               workout: workout,
                               onStart: () {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      'Màn hình tập luyện "${workout.name}" đang được chuẩn bị cho Phase 3!',
-                                      style: AppTypography.bodyMedium
-                                          .copyWith(color: Colors.white),
-                                    ),
-                                    backgroundColor: workout.category.color,
-                                    behavior: SnackBarBehavior.floating,
-                                    shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(12)),
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        WorkoutPlayerPage(workout: workout),
                                   ),
                                 );
                               },

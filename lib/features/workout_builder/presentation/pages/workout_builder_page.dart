@@ -10,6 +10,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../widgets/exercise_form_dialog.dart';
 import '../widgets/exercise_list_item.dart';
+import '../widgets/workout_target_summary_card.dart';
 
 /// Màn hình tạo mới hoặc chỉnh sửa một bài tập
 class WorkoutBuilderPage extends StatelessWidget {
@@ -488,6 +489,16 @@ class _WorkoutBuilderViewState extends State<_WorkoutBuilderView> {
                           borderRadius: BorderRadius.circular(12)),
                     ),
                   ),
+                ),
+
+                const SizedBox(height: 28),
+
+                // ── Section 8: Kết quả mục tiêu bài tập ──────────────────
+                _sectionTitle('KẾT QUẢ MỤC TIÊU BÀI TẬP'),
+                const SizedBox(height: 12),
+                WorkoutTargetSummaryCard(
+                  exercises: state.exercises,
+                  targetRounds: state.targetRounds,
                 ),
 
                 const SizedBox(height: 40),

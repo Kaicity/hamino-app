@@ -5,6 +5,8 @@ import '../../features/workout_builder/data/repositories/workout_repository_impl
 import '../../features/workout_builder/domain/repositories/workout_repository.dart';
 import '../../features/workout_builder/presentation/bloc/workout_catalog_bloc.dart';
 import '../../features/workout_builder/presentation/bloc/workout_builder_bloc.dart';
+import '../../features/workout_player/domain/services/precision_ticker.dart';
+import '../../features/workout_player/presentation/bloc/workout_player_bloc.dart';
 
 /// Service Locator toàn cục của ứng dụng
 final sl = GetIt.instance;
@@ -47,7 +49,8 @@ Future<void> _initWorkoutBuilder() async {
 
 /// Đăng ký dependencies cho tính năng Workout Player (Đồng hồ đếm giờ & Trạng thái tập)
 Future<void> _initWorkoutPlayer() async {
-  // Sẽ được bổ sung tại Phase 3 (PrecisionTicker, WorkoutPlayerBloc)
+  sl.registerLazySingleton<PrecisionTicker>(() => const PrecisionTicker());
+  sl.registerFactory(() => WorkoutPlayerBloc(ticker: sl<PrecisionTicker>()));
 }
 
 /// Đăng ký dependencies cho tính năng History (Lịch sử buổi tập)

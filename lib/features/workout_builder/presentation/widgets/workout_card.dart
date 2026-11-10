@@ -242,6 +242,10 @@ class WorkoutCard extends StatelessWidget {
                     workout.hasTimeCap ? 'Cap: ${workout.timeCapDisplay}' : 'Không giới hạn'),
                 _metricChip(
                     Icons.fitness_center_outlined, '${workout.totalExercises} Động tác'),
+                if (workout.totalRepsAllRounds > 0)
+                  _metricChip(Icons.flash_on_rounded, 'Mục tiêu: ${workout.totalRepsAllRounds} reps'),
+                if (workout.totalHoldSecondsAllRounds > 0)
+                  _metricChip(Icons.hourglass_bottom_rounded, 'Giữ: ${workout.totalHoldTimeDisplay}'),
               ],
             ),
           ),

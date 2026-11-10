@@ -8,6 +8,7 @@ import 'package:hamino_app/features/workout_builder/presentation/widgets/empty_s
 import 'package:hamino_app/features/workout_builder/presentation/widgets/exercise_form_dialog.dart';
 import 'package:hamino_app/features/workout_builder/presentation/widgets/exercise_list_item.dart';
 import 'package:hamino_app/features/workout_builder/presentation/widgets/workout_card.dart';
+import 'package:hamino_app/features/workout_builder/presentation/widgets/workout_target_summary_card.dart';
 
 void main() {
   Widget wrapWidget(Widget child) {
@@ -60,6 +61,8 @@ void main() {
       expect(find.text('5 Hiệp'), findsOneWidget);
       expect(find.text('Cap: 20 phút'), findsOneWidget);
       expect(find.text('2 Động tác'), findsOneWidget);
+      expect(find.text('Mục tiêu: 25 reps'), findsOneWidget);
+      expect(find.text('Giữ: 2 phút 30 giây'), findsOneWidget);
       expect(find.text('Muscle-up'), findsOneWidget);
       expect(find.text('5 reps'), findsOneWidget);
       expect(find.text('Handstand Hold'), findsOneWidget);
@@ -202,6 +205,120 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Số giây giữ (hold) *'), findsOneWidget);
+    });
+  });
+
+  group('WorkoutTargetSummaryCard Tests', () {
+    testWidgets('Renders empty state hint when exercises list is empty', (tester) async {
+      await tester.pumpWidget(wrapWidget(const WorkoutTargetSummaryCard(
+        exercises: [],
+        targetRounds: 4,
+      )));
+
+      expect(
+        find.text('Thêm động tác để xem tổng số rep và thời gian giữ mục tiêu.'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('Calculates total reps across all rounds correctly', (tester) async {
+      const exercises = [
+        ExerciseEntity(
+          id: 'e1',
+          workoutId: 'w1',
+          name: 'Push-ups',
+          defaultReps: 20,
+          holdSeconds: 0,
+          orderIndex: 0,
+        ),
+        ExerciseEntity(
+          id: 'e2',
+          workoutId: 'w1',
+          name: 'Pull-ups',
+          defaultReps: 10,
+          holdSeconds: 0,
+          orderIndex: 1,
+        ),
+      ];
+
+      await tester.pumpWidget(wrapWidget(const WorkoutTargetSummaryCard(
+        exercises: exercises,
+        targetRounds: 5,
+      )));
+
+      // Total reps = (20 + 10) * 5 = 150 reps
+      expect(find.text('MỤC TIÊU TOÀN BUỔI TẬP'), findsOneWidget);
+      expect(find.text('Tổng khối lượng qua 5 hiệp tập'), findsOneWidget);
+      expect(find.text('10 SETS'), findsOneWidget); // 2 ex * 5 rounds
+      expect(find.text('TỔNG SỐ REPS'), findsOneWidget);
+      expect(find.text('150'), findsOneWidget);
+      expect(find.text('reps'), findsOneWidget);
+      expect(find.text('30 reps/hiệp × 5 hiệp'), findsOneWidget);
+      // No hold exercises
+      expect(find.text('TỔNG THỜI GIAN GIỮ'), findsNothing);
+    });
+
+    testWidgets('Calculates total hold seconds converted to minutes across rounds', (tester) async {
+      const exercises = [
+        ExerciseEntity(
+          id: 'e1',
+          workoutId: 'w1',
+          name: 'Handstand Hold',
+          defaultReps: 0,
+          holdSeconds: 30,
+          orderIndex: 0,
+        ),
+      ];
+
+      await tester.pumpWidget(wrapWidget(const WorkoutTargetSummaryCard(
+        exercises: exercises,
+        targetRounds: 5,
+      )));
+
+      // Total hold = 30s * 5 = 150s = 2 phút 30 giây
+      expect(find.text('TỔNG THỜI GIAN GIỮ'), findsOneWidget);
+      expect(find.text('2 phút 30 giây'), findsOneWidget);
+      expect(find.text('30s/hiệp × 5 hiệp'), findsOneWidget);
+      expect(find.text('5 SETS'), findsOneWidget);
+      expect(find.text('TỔNG SỐ REPS'), findsNothing);
+    });
+
+    testWidgets('Calculates both reps and hold seconds when workout is mixed', (tester) async {
+      const exercises = [
+        ExerciseEntity(
+          id: 'e1',
+          workoutId: 'w1',
+          name: 'Dips',
+          defaultReps: 15,
+          holdSeconds: 0,
+          orderIndex: 0,
+        ),
+        ExerciseEntity(
+          id: 'e2',
+          workoutId: 'w1',
+          name: 'Plank Hold',
+          defaultReps: 0,
+          holdSeconds: 20,
+          orderIndex: 1,
+        ),
+      ];
+
+      await tester.pumpWidget(wrapWidget(const WorkoutTargetSummaryCard(
+        exercises: exercises,
+        targetRounds: 3,
+      )));
+
+      // Reps: 15 * 3 = 45 reps
+      expect(find.text('TỔNG SỐ REPS'), findsOneWidget);
+      expect(find.text('45'), findsOneWidget);
+      expect(find.text('15 reps/hiệp × 3 hiệp'), findsOneWidget);
+
+      // Hold: 20s * 3 = 60s = 1 phút
+      expect(find.text('TỔNG THỜI GIAN GIỮ'), findsOneWidget);
+      expect(find.text('1 phút'), findsOneWidget);
+      expect(find.text('20s/hiệp × 3 hiệp'), findsOneWidget);
+
+      expect(find.text('6 SETS'), findsOneWidget);
     });
   });
 }

@@ -52,7 +52,7 @@
 - [x] **Phase 0:** Khởi tạo Nền tảng, Thư viện & Core Architecture *(4/4 Tasks - 14/14 Checklist Items)*
 - [x] **Phase 1:** Cơ sở dữ liệu Cục bộ & Preset Mẫu Calisthenics *(4/4 Tasks - 16/16 Checklist Items)*
 - [x] **Phase 2:** Quản lý & Trình tạo Bài tập (Workout Builder CRUD) *(4/4 Tasks - 16/16 Checklist Items)*
-- [ ] **Phase 3:** Bộ đếm giờ Chuẩn xác & Màn hình Tập luyện (Timer Engine & UI) *(0/5 Tasks - 0/18 Checklist Items)*
+- [x] **Phase 3:** Bộ đếm giờ Chuẩn xác & Màn hình Tập luyện (Timer Engine & UI) *(5/5 Tasks - 18/18 Checklist Items)*
 - [ ] **Phase 4:** Hệ thống Giọng nói Thông minh (TTS) & Âm thanh (Audio Coach) *(0/4 Tasks - 0/15 Checklist Items)*
 - [ ] **Phase 5:** Wakelock, Chạy nền & Lịch sử Tập luyện *(0/4 Tasks - 0/14 Checklist Items)*
 - [ ] **Phase 6:** Cài đặt Hệ thống, Kiểm thử, Tối ưu & Hoàn thiện *(0/4 Tasks - 0/14 Checklist Items)*
@@ -236,22 +236,22 @@
 | **TASK-3.5** | Widget Tiến độ & Next Up | Hiển thị tổng thời gian đã trôi qua và xem trước bài tập kế tiếp. | Người tập luôn nắm bắt được khối lượng còn lại của buổi tập. | P2 |
 
 #### Checklist Chi Tiết Thực Hiện (Action Items)
-- [ ] **TASK-3.1: Xây dựng High-Precision Ticker Engine (Timestamp-Delta)**
-  - [ ] Tạo file `lib/features/workout_player/domain/services/precision_ticker.dart`.
-  - [ ] Tạo hàm stream tick với chu kỳ 100ms: `Stream<DateTime> tick({Duration interval = const Duration(milliseconds: 100)})`.
-  - [ ] Thiết lập thuật toán tính toán thời gian thực tế:
+- [x] **TASK-3.1: Xây dựng High-Precision Ticker Engine (Timestamp-Delta)**
+  - [x] Tạo file `lib/features/workout_player/domain/services/precision_ticker.dart`.
+  - [x] Tạo hàm stream tick với chu kỳ 100ms: `Stream<DateTime> tick({Duration interval = const Duration(milliseconds: 100)})`.
+  - [x] Thiết lập thuật toán tính toán thời gian thực tế:
     $$\text{remainingSeconds} = \text{targetSeconds} - \left(\frac{\text{DateTime.now()} - \text{startedAt}}{1000}\right) + \text{accumulatedPauseSeconds}$$
-  - [ ] Đảm bảo cơ chế tính độc lập với tốc độ callback của hệ điều hành, triệt tiêu hoàn toàn Timer Drift.
+  - [x] Đảm bảo cơ chế tính độc lập với tốc độ callback của hệ điều hành, triệt tiêu hoàn toàn Timer Drift.
 
-- [ ] **TASK-3.2: Xây dựng WorkoutPlayerBloc (Finite State Machine)**
-  - [ ] Định nghĩa các States trong `workout_player_state.dart`:
+- [x] **TASK-3.2: Xây dựng WorkoutPlayerBloc (Finite State Machine)**
+  - [x] Định nghĩa các States trong `workout_player_state.dart`:
     - `PlayerInitial`: Đang tải giáo án, chuẩn bị vào bài.
     - `PlayerPrepare`: Đang đếm ngược chuẩn bị (VD: 10s... 1s).
     - `PlayerWork`: Đang trong hiệp tập (hiển thị thời gian trôi qua hoặc đếm lùi thời gian hold).
     - `PlayerRest`: Đang trong thời gian nghỉ giữa hiệp.
     - `PlayerPaused`: Toàn bộ timer tạm dừng, lưu mốc thời gian pause.
     - `PlayerCompleted`: Hoàn thành toàn bộ số hiệp hoặc chạm Time Cap.
-  - [ ] Định nghĩa các Events trong `workout_player_event.dart`:
+  - [x] Định nghĩa các Events trong `workout_player_event.dart`:
     - `StartWorkoutEvent(WorkoutTemplateModel workout)`
     - `TimerTickEvent(DateTime currentTime)`
     - `PauseWorkoutEvent()` & `ResumeWorkoutEvent()`
@@ -259,30 +259,30 @@
     - `PreviousStepEvent()` (quay lại bài hoặc hiệp trước)
     - `AddRestTimeEvent(int additionalSeconds)` (cộng thêm 10s/30s nghỉ)
     - `FinishWorkoutEarlyEvent()` (kết thúc sớm có chủ đích)
-  - [ ] Xử lý logic chuyển đổi trạng thái tuần tự và chuyển round trong `WorkoutPlayerBloc`.
+  - [x] Xử lý logic chuyển đổi trạng thái tuần tự và chuyển round trong `WorkoutPlayerBloc`.
 
-- [ ] **TASK-3.3: Màn hình Tập luyện Toàn màn hình (Player Screen UI)**
-  - [ ] Tạo `WorkoutPlayerScreen` với giao diện Fullscreen đắm chìm (Immersive mode).
-  - [ ] Áp dụng hiệu ứng đổi màu nền động theo trạng thái:
+- [x] **TASK-3.3: Màn hình Tập luyện Toàn màn hình (Player Screen UI)**
+  - [x] Tạo `WorkoutPlayerScreen` với giao diện Fullscreen đắm chìm (Immersive mode).
+  - [x] Áp dụng hiệu ứng đổi màu nền động theo trạng thái:
     - Khi Work: Nền đen ánh xanh lá `#0D2818` với đường viền / accent `#00E676` (hoặc Cam `#FF6D00` cho EMOM).
     - Khi Rest: Nền đen ánh xanh dương `#0A192F` với accent `#2979FF`.
     - Khi Prepare: Nền đen ánh vàng `#2A2605` với accent `#FFD600`.
-  - [ ] Hiển thị đồng hồ đếm số khổng lồ (Format `mm:ss`), chiều cao tối thiểu 90sp sử dụng Monospace Font.
-  - [ ] Hiển thị thông tin bài tập hiện tại: Tên động tác, Số reps cần hoàn thành (hoặc số giây hold).
-  - [ ] Hiển thị tiến độ hiệp tập: `HIỆP 3 / 8` (chữ to, dễ đọc).
+  - [x] Hiển thị đồng hồ đếm số khổng lồ (Format `mm:ss`), chiều cao tối thiểu 90sp sử dụng Monospace Font.
+  - [x] Hiển thị thông tin bài tập hiện tại: Tên động tác, Số reps cần hoàn thành (hoặc số giây hold).
+  - [x] Hiển thị tiến độ hiệp tập: `HIỆP 3 / 8` (chữ to, dễ đọc).
 
-- [ ] **TASK-3.4: Bảng Điều Khiển Cảm Ứng & Khóa Chạm (Touch Controls & Screen Lock)**
-  - [ ] Thiết kế nút Play/Pause kích thước lớn (tối thiểu 76x76px) nằm ở trung tâm tầm tay người dùng.
-  - [ ] Nút "Bỏ qua / Xong hiệp" (Next) và "Quay lại" (Previous) to bản.
-  - [ ] Nút "+10s Nghỉ" và "+30s Nghỉ" (chỉ hiển thị và sáng lên khi trạng thái là `PlayerRest`).
-  - [ ] Tính năng Khóa Màn Hình (Screen Lock Mode):
-    - [ ] Nút biểu tượng ổ khóa ở góc màn hình.
-    - [ ] Khi bật: Vô hiệu hóa toàn bộ các nút bấm và cử chỉ chạm (tránh mồ hôi rơi trúng màn hình làm nhảy bài).
-    - [ ] Mở khóa bằng cơ chế giữ 2 giây: `GestureDetector.onLongPress` kèm animation tròn đếm mở khóa.
+- [x] **TASK-3.4: Bảng Điều Khiển Cảm Ứng & Khóa Chạm (Touch Controls & Screen Lock)**
+  - [x] Thiết kế nút Play/Pause kích thước lớn (tối thiểu 76x76px) nằm ở trung tâm tầm tay người dùng.
+  - [x] Nút "Bỏ qua / Xong hiệp" (Next) và "Quay lại" (Previous) to bản.
+  - [x] Nút "+10s Nghỉ" và "+30s Nghỉ" (chỉ hiển thị và sáng lên khi trạng thái là `PlayerRest`).
+  - [x] Tính năng Khóa Màn Hình (Screen Lock Mode):
+    - [x] Nút biểu tượng ổ khóa ở góc màn hình.
+    - [x] Khi bật: Vô hiệu hóa toàn bộ các nút bấm và cử chỉ chạm (tránh mồ hôi rơi trúng màn hình làm nhảy bài).
+    - [x] Mở khóa bằng cơ chế giữ 2 giây: `GestureDetector.onLongPress` kèm animation tròn đếm mở khóa.
 
-- [ ] **TASK-3.5: Widget Tiến Độ Tổng Thể & Thẻ Xem Trước "Next Up"**
-  - [ ] Thanh ProgressBar mảnh trên cùng thể hiện tổng thời lượng đã tập so với Time Cap.
-  - [ ] Thẻ "Next Up" ở cạnh dưới: Hiển thị tên động tác tiếp theo và số reps (giúp người tập chuẩn bị tinh thần và dụng cụ xà/tạ trước khi hết giờ nghỉ).
+- [x] **TASK-3.5: Widget Tiến Độ Tổng Thể & Thẻ Xem Trước "Next Up"**
+  - [x] Thanh ProgressBar mảnh trên cùng thể hiện tổng thời lượng đã tập so với Time Cap.
+  - [x] Thẻ "Next Up" ở cạnh dưới: Hiển thị tên động tác tiếp theo và số reps (giúp người tập chuẩn bị tinh thần và dụng cụ xà/tạ trước khi hết giờ nghỉ).
 
 ---
 

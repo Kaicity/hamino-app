@@ -193,6 +193,38 @@ class WorkoutBuilderState extends Equatable {
     );
   }
 
+  /// Tổng số rep trong 1 hiệp
+  int get totalRepsPerRound =>
+      exercises.fold(0, (sum, ex) => sum + ex.defaultReps);
+
+  /// Tổng số rep của toàn bộ bài tập (tất cả các hiệp)
+  int get totalRepsAllRounds => totalRepsPerRound * targetRounds;
+
+  /// Tổng số giây giữ tĩnh trong 1 hiệp
+  int get totalHoldSecondsPerRound =>
+      exercises.fold(0, (sum, ex) => sum + ex.holdSeconds);
+
+  /// Tổng số giây giữ tĩnh của toàn bộ bài tập (tất cả các hiệp)
+  int get totalHoldSecondsAllRounds =>
+      totalHoldSecondsPerRound * targetRounds;
+
+  /// Chuỗi quy đổi tổng số giây giữ sang phút/giây
+  /// Ví dụ: 60s -> "1 phút", 150s -> "2 phút 30 giây", 45s -> "45 giây"
+  String get totalHoldTimeDisplay {
+    final totalSec = totalHoldSecondsAllRounds;
+    if (totalSec <= 0) return '0 giây';
+    if (totalSec < 60) return '$totalSec giây';
+    final minutes = totalSec ~/ 60;
+    final seconds = totalSec % 60;
+    if (seconds == 0) {
+      return '$minutes phút';
+    }
+    return '$minutes phút $seconds giây';
+  }
+
+  /// Tổng số lượt tập (sets) của cả buổi tập
+  int get totalSets => exercises.length * targetRounds;
+
   @override
   List<Object?> get props => [
         editingId,

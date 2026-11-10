@@ -8,6 +8,9 @@ import 'package:hamino_app/features/workout_builder/domain/entities/workout_temp
 import 'package:hamino_app/features/workout_builder/domain/repositories/workout_repository.dart';
 import 'package:hamino_app/features/workout_builder/presentation/bloc/workout_builder_bloc.dart';
 import 'package:hamino_app/features/workout_builder/presentation/bloc/workout_catalog_bloc.dart';
+import 'package:hamino_app/features/workout_player/domain/services/precision_ticker.dart';
+import 'package:hamino_app/features/workout_player/presentation/bloc/workout_player_bloc.dart';
+import 'package:hamino_app/features/workout_player/presentation/pages/workout_player_page.dart';
 import 'package:hamino_app/main.dart';
 
 class FakeWorkoutRepository implements WorkoutRepository {
@@ -59,6 +62,8 @@ void main() {
     sl.registerLazySingleton<WorkoutRepository>(() => FakeWorkoutRepository());
     sl.registerFactory(() => WorkoutCatalogBloc(sl<WorkoutRepository>()));
     sl.registerFactory(() => WorkoutBuilderBloc(sl<WorkoutRepository>()));
+    sl.registerLazySingleton<PrecisionTicker>(() => const PrecisionTicker());
+    sl.registerFactory(() => WorkoutPlayerBloc(ticker: sl<PrecisionTicker>()));
   });
 
   tearDown(() async {
@@ -120,6 +125,23 @@ void main() {
       expect(find.text('1 BÀI TẬP'), findsOneWidget);
       expect(find.text('EMOM 20m Beast'), findsOneWidget);
       expect(find.text('Endurance 30m Circuit'), findsNothing);
+    });
+
+    testWidgets('Tapping BẮT ĐẦU TẬP navigates to WorkoutPlayerPage',
+        (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(const HaminoApp());
+      await tester.pumpAndSettle();
+
+      final startButton = find.text('BẮT ĐẦU TẬP').first;
+      await tester.tap(startButton);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(WorkoutPlayerPage), findsOneWidget);
+      expect(find.text('CHUẨN BỊ'), findsOneWidget);
     });
 
     test('TimeFormatter formats seconds correctly', () {

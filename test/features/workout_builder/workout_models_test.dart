@@ -147,6 +147,30 @@ void main() {
       expect(workout.hasTimeCap, true);
       expect(workout.timeCapDisplay, '10 phút');
 
+      // Target volume getters
+      expect(workout.totalRepsPerRound, 15);
+      expect(workout.totalRepsAllRounds, 60);
+      expect(workout.totalHoldSecondsPerRound, 0);
+      expect(workout.totalHoldSecondsAllRounds, 0);
+      expect(workout.totalHoldTimeDisplay, '0 giây');
+      expect(workout.totalSets, 4);
+
+      final holdWorkout = workout.copyWith(
+        exercises: const [
+          ExerciseModel(
+            id: 'ex_hold',
+            workoutId: 'w_test_1',
+            name: 'Plank Hold',
+            defaultReps: 0,
+            holdSeconds: 45,
+            orderIndex: 0,
+          ),
+        ],
+      );
+      expect(holdWorkout.totalHoldSecondsPerRound, 45);
+      expect(holdWorkout.totalHoldSecondsAllRounds, 180);
+      expect(holdWorkout.totalHoldTimeDisplay, '3 phút');
+
       final noCapWorkout = workout.copyWith(timeCapSeconds: 0);
       expect(noCapWorkout.hasTimeCap, false);
       expect(noCapWorkout.timeCapDisplay, 'Không giới hạn');
