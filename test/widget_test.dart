@@ -1,30 +1,34 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
+import 'package:hamino_app/core/utils/time_formatter.dart';
 import 'package:hamino_app/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  group('Hamino Workout Phase 0 Smoke Tests', () {
+    testWidgets('App renders branding and phase 0 banner', (WidgetTester tester) async {
+      await tester.pumpWidget(const HaminoApp());
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+      expect(find.text('HAMINO'), findsOneWidget);
+      expect(find.text('WORKOUT'), findsOneWidget);
+      expect(find.text('PHASE 0 HOÀN TẤT'), findsOneWidget);
+      expect(find.text('EMOM'), findsOneWidget);
+      expect(find.text('ENDURANCE'), findsOneWidget);
+      expect(find.text('SKILL'), findsOneWidget);
+      expect(find.text('CARDIO'), findsOneWidget);
+    });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    test('TimeFormatter formats seconds correctly', () {
+      expect(TimeFormatter.formatSeconds(0), '00:00');
+      expect(TimeFormatter.formatSeconds(45), '00:45');
+      expect(TimeFormatter.formatSeconds(65), '01:05');
+      expect(TimeFormatter.formatSeconds(120), '02:00');
+      expect(TimeFormatter.formatSeconds(3665), '01:01:05');
+    });
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    test('TimeFormatter formatSecondsToReadable works as expected', () {
+      expect(TimeFormatter.formatSecondsToReadable(30), '30s');
+      expect(TimeFormatter.formatSecondsToReadable(60), '1m');
+      expect(TimeFormatter.formatSecondsToReadable(90), '1m 30s');
+      expect(TimeFormatter.formatSecondsToReadable(120), '2m');
+    });
   });
 }
