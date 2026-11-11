@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/di/injection_container.dart';
+import '../../../../core/services/audio_cue_manager.dart';
+import '../../../../core/services/audio_service_interface.dart';
+import '../../../../core/services/tts_service_interface.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/time_formatter.dart';
@@ -30,8 +33,35 @@ class WorkoutPlayerPage extends StatelessWidget {
   }
 }
 
-class _WorkoutPlayerView extends StatelessWidget {
+class _WorkoutPlayerView extends StatefulWidget {
   const _WorkoutPlayerView();
+
+  @override
+  State<_WorkoutPlayerView> createState() => _WorkoutPlayerViewState();
+}
+
+class _WorkoutPlayerViewState extends State<_WorkoutPlayerView> {
+  late final AudioCueManager _audioCueManager;
+
+  @override
+  void initState() {
+    super.initState();
+    if (sl.isRegistered<AudioCueManager>()) {
+      _audioCueManager = sl<AudioCueManager>();
+    } else {
+      _audioCueManager = AudioCueManager(
+        audioService: const _NoOpAudioService(),
+        ttsService: const _NoOpTtsService(),
+      );
+    }
+    _audioCueManager.initialize();
+  }
+
+  @override
+  void dispose() {
+    _audioCueManager.dispose();
+    super.dispose();
+  }
 
   Future<bool> _confirmExit(BuildContext context) async {
     final confirmed = await showDialog<bool>(
@@ -140,7 +170,9 @@ class _WorkoutPlayerView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<WorkoutPlayerBloc, WorkoutPlayerState>(
-      listener: (context, state) {},
+      listener: (context, state) {
+        _audioCueManager.handleState(state);
+      },
       builder: (context, state) {
         final bloc = context.read<WorkoutPlayerBloc>();
 
@@ -178,7 +210,7 @@ class _WorkoutPlayerView extends StatelessWidget {
                 children: [
                   Column(
                     children: [
-                      // ── Top Header: Back button, Progress bar, Lock button ──
+                      // ── Top Header: Back button, Progress bar, Sound & Lock button ──
                       Padding(
                         padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
                         child: Row(
@@ -216,22 +248,48 @@ class _WorkoutPlayerView extends StatelessWidget {
                               ),
                             ),
 
-                            // Screen Lock button
-                            IconButton(
-                              icon: Icon(
-                                state.isScreenLocked
-                                    ? Icons.lock_rounded
-                                    : Icons.lock_open_rounded,
-                                color: state.isScreenLocked
-                                    ? AppColors.prepareYellow
-                                    : AppColors.textMuted,
-                                size: 24,
-                              ),
-                              tooltip: state.isScreenLocked
-                                  ? 'Mở khóa màn hình'
-                                  : 'Khóa màn hình cảm ứng',
-                              onPressed: () =>
-                                  bloc.add(const ToggleScreenLockEvent()),
+                            // Action buttons: Sound toggle & Screen Lock
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: Icon(
+                                    _audioCueManager.isSfxEnabled
+                                        ? Icons.volume_up_rounded
+                                        : Icons.volume_off_rounded,
+                                    color: _audioCueManager.isSfxEnabled
+                                        ? AppColors.textWhite
+                                        : AppColors.textMuted,
+                                    size: 24,
+                                  ),
+                                  tooltip: _audioCueManager.isSfxEnabled
+                                      ? 'Tắt âm thanh & HLV'
+                                      : 'Bật âm thanh & HLV',
+                                  onPressed: () {
+                                    setState(() {
+                                      final enabled = !_audioCueManager.isSfxEnabled;
+                                      _audioCueManager.isSfxEnabled = enabled;
+                                      _audioCueManager.isTtsEnabled = enabled;
+                                    });
+                                  },
+                                ),
+                                IconButton(
+                                  icon: Icon(
+                                    state.isScreenLocked
+                                        ? Icons.lock_rounded
+                                        : Icons.lock_open_rounded,
+                                    color: state.isScreenLocked
+                                        ? AppColors.prepareYellow
+                                        : AppColors.textMuted,
+                                    size: 24,
+                                  ),
+                                  tooltip: state.isScreenLocked
+                                      ? 'Mở khóa màn hình'
+                                      : 'Khóa màn hình cảm ứng',
+                                  onPressed: () =>
+                                      bloc.add(const ToggleScreenLockEvent()),
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -523,4 +581,49 @@ class _WorkoutPlayerView extends StatelessWidget {
     );
   }
 }
+
+class _NoOpAudioService implements IAudioService {
+  const _NoOpAudioService();
+
+  @override
+  Future<void> initialize() async {}
+  @override
+  Future<void> playBeepShort() async {}
+  @override
+  Future<void> playBeepHigh() async {}
+  @override
+  Future<void> playWhistleStart() async {}
+  @override
+  Future<void> playBellWork() async {}
+  @override
+  Future<void> playChimeRest() async {}
+  @override
+  Future<void> playVictoryFanfare() async {}
+  @override
+  Future<void> stop() async {}
+  @override
+  Future<void> dispose() async {}
+}
+
+class _NoOpTtsService implements ITtsService {
+  const _NoOpTtsService();
+
+  @override
+  Future<void> initialize() async {}
+  @override
+  Future<void> speak(String text, {bool awaitCompletion = false}) async {}
+  @override
+  Future<void> stop() async {}
+  @override
+  Future<void> setLanguage(String languageCode) async {}
+  @override
+  Future<void> setSpeechRate(double rate) async {}
+  @override
+  Future<void> setVolume(double volume) async {}
+  @override
+  Future<void> setPitch(double pitch) async {}
+  @override
+  Future<bool> isLanguageAvailable(String languageCode) async => true;
+}
+
 

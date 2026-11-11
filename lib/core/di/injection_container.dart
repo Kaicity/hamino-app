@@ -1,6 +1,12 @@
 import 'package:get_it/get_it.dart';
 
 import '../database/database_helper.dart';
+import '../services/audio_focus_service.dart';
+import '../services/audio_service_interface.dart';
+import '../services/audio_sfx_service.dart';
+import '../services/audio_cue_manager.dart';
+import '../services/tts_service.dart';
+import '../services/tts_service_interface.dart';
 import '../../features/workout_builder/data/repositories/workout_repository_impl.dart';
 import '../../features/workout_builder/domain/repositories/workout_repository.dart';
 import '../../features/workout_builder/presentation/bloc/workout_catalog_bloc.dart';
@@ -33,6 +39,11 @@ Future<void> initDependencies() async {
 Future<void> _initCore() async {
   // Database SQLite
   sl.registerLazySingleton<DatabaseHelper>(() => DatabaseHelper());
+
+  // Audio & Voice Services (Phase 4)
+  sl.registerLazySingleton<IAudioService>(() => AudioSfxService());
+  sl.registerLazySingleton<ITtsService>(() => TtsService());
+  sl.registerLazySingleton<AudioFocusService>(() => AudioFocusService());
 }
 
 /// Đăng ký dependencies cho tính năng Workout Builder (CRUD giáo án)
@@ -51,6 +62,15 @@ Future<void> _initWorkoutBuilder() async {
 Future<void> _initWorkoutPlayer() async {
   sl.registerLazySingleton<PrecisionTicker>(() => const PrecisionTicker());
   sl.registerFactory(() => WorkoutPlayerBloc(ticker: sl<PrecisionTicker>()));
+
+  // Audio Cue Coordinator
+  sl.registerFactory<AudioCueManager>(
+    () => AudioCueManager(
+      audioService: sl<IAudioService>(),
+      ttsService: sl<ITtsService>(),
+      audioFocusService: sl<AudioFocusService>(),
+    ),
+  );
 }
 
 /// Đăng ký dependencies cho tính năng History (Lịch sử buổi tập)

@@ -216,7 +216,7 @@ void main() {
       )));
 
       expect(
-        find.text('Thêm động tác để xem tổng số rep và thời gian giữ mục tiêu.'),
+        find.text('Thêm động tác để xem chi tiết số rep và thời gian giữ mục tiêu từng động tác.'),
         findsOneWidget,
       );
     });

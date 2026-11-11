@@ -84,7 +84,8 @@ void main() {
       expect(find.byIcon(Icons.pause_rounded), findsOneWidget);
       expect(find.byIcon(Icons.skip_next_rounded), findsOneWidget);
 
-      // Lock button
+      // Sound button & Lock button
+      expect(find.byIcon(Icons.volume_up_rounded), findsOneWidget);
       expect(find.byIcon(Icons.lock_open_rounded), findsOneWidget);
 
       // Next Up card shows exercise 2

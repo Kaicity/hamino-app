@@ -7,7 +7,6 @@ import 'package:hamino_app/features/history/domain/entities/workout_session_reco
 import 'package:hamino_app/features/workout_builder/data/models/exercise_model.dart';
 import 'package:hamino_app/features/workout_builder/data/models/workout_template_model.dart';
 import 'package:hamino_app/features/workout_builder/domain/entities/exercise_entity.dart';
-import 'package:hamino_app/features/workout_builder/domain/entities/exercise_target_volume.dart';
 import 'package:hamino_app/features/workout_builder/domain/entities/workout_category.dart';
 import 'package:hamino_app/features/workout_builder/domain/entities/workout_template_entity.dart';
 

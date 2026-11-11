@@ -298,40 +298,40 @@
 | **TASK-4.4** | Audio Focus & Ducking | Cấu hình `audio_session`: tự động giảm nhạc nền khi có giọng đọc Hamino. | Trải nghiệm vừa nghe Spotify vừa nhận khẩu lệnh rõ ràng. | P1 |
 
 #### Checklist Chi Tiết Thực Hiện (Action Items)
-- [ ] **TASK-4.1: Tích hợp SFX & Kho File Âm Thanh Thể Thao**
-  - [ ] Chuẩn bị các file âm thanh chất lượng cao đặt trong `assets/audio/`:
+- [x] **TASK-4.1: Tích hợp SFX & Kho File Âm Thanh Thể Thao**
+  - [x] Chuẩn bị các file âm thanh chất lượng cao đặt trong `assets/audio/`:
     - `beep_short.wav` (tiếng bíp nhẹ cho chuẩn bị)
     - `beep_high.wav` (tiếng bíp cao độ đếm 3, 2, 1)
     - `whistle_start.wav` (tiếng còi thể thao bắt đầu hiệp)
     - `rest_chime.wav` (âm chuông nhẹ báo vào giờ nghỉ)
     - `victory_fanfare.wav` (âm thanh chúc mừng hoàn thành bài tập)
-  - [ ] Tạo file `lib/core/services/audio_sfx_service.dart` quản lý `AudioPlayer`.
-  - [ ] Thực hiện pre-cache (tải trước) toàn bộ file âm thanh vào bộ nhớ khi app khởi động để đảm bảo độ trễ phát dưới 50ms.
+  - [x] Tạo file `lib/core/services/audio_sfx_service.dart` quản lý `AudioPlayer`.
+  - [x] Thực hiện pre-cache (tải trước) toàn bộ file âm thanh vào bộ nhớ khi app khởi động để đảm bảo độ trễ phát dưới 50ms.
 
-- [ ] **TASK-4.2: Tích hợp Dịch vụ Giọng Nói Trợ Lý Ảo (TtsService)**
-  - [ ] Tạo file `lib/core/services/tts_service.dart` bọc thư viện `flutter_tts`.
-  - [ ] Cấu hình tham số đọc chuẩn thể thao:
+- [x] **TASK-4.2: Tích hợp Dịch vụ Giọng Nói Trợ Lý Ảo (TtsService)**
+  - [x] Tạo file `lib/core/services/tts_service.dart` bọc thư viện `flutter_tts`.
+  - [x] Cấu hình tham số đọc chuẩn thể thao:
     - Hỗ trợ ngôn ngữ: `vi-VN` (Tiếng Việt) và `en-US` (Tiếng Anh).
     - `speechRate: 0.52` (tốc độ đọc vừa phải, dứt khoát).
     - `pitch: 1.0` (cao độ tự nhiên, rõ ràng).
-  - [ ] Viết hàm `speak(String text, {bool awaitCompletion = false})` và `stop()`.
-  - [ ] Xử lý fallback an toàn: Nếu máy chưa tải gói giọng đọc tiếng Việt thì tự động fallback tiếng Anh hoặc chuyển sang chỉ dùng âm SFX.
+  - [x] Viết hàm `speak(String text, {bool awaitCompletion = false})` và `stop()`.
+  - [x] Xử lý fallback an toàn: Nếu máy chưa tải gói giọng đọc tiếng Việt thì tự động fallback tiếng Anh hoặc chuyển sang chỉ dùng âm SFX.
 
-- [ ] **TASK-4.3: Xây dựng Bộ Điều Phối Âm Thanh (AudioCueManager)**
-  - [ ] Tạo class `AudioCueManager` lắng nghe State Stream từ `WorkoutPlayerBloc`.
-  - [ ] Định nghĩa các quy tắc kích hoạt âm thanh tự động:
-    - [ ] **Bắt đầu chuẩn bị:** Đọc: *"Chuẩn bị: [Tên bài tập]"*.
-    - [ ] **Đếm ngược 3 giây cuối:** Phát `beep_high` ở các giây 3, 2, 1 (hoặc đọc *"Ba, Hai, Một"*).
-    - [ ] **Bắt đầu hiệp (0s):** Phát `whistle_start` + đọc *"Bắt đầu!"* hoặc *"Hiệp [X], Bắt đầu!"*.
-    - [ ] **Chuyển sang nghỉ (Rest):** Phát `rest_chime` + đọc *"Nghỉ [Y] giây"*.
-    - [ ] **Nhắc nhở sắp hết giờ nghỉ:** Khi còn đúng 10 giây nghỉ, phát tiếng bíp nhẹ + đọc *"Còn 10 giây, chuẩn bị [Bài kế tiếp]"*.
-    - [ ] **Hoàn thành bài tập:** Phát `victory_fanfare` + đọc *"Chúc mừng bạn đã hoàn thành bài tập xuất sắc!"*.
-  - [ ] Thiết lập logic chống chồng lấn (No Overlap): Nếu TTS đang đọc thì tạm dừng âm SFX phụ hoặc đợi dứt câu.
+- [x] **TASK-4.3: Xây dựng Bộ Điều Phối Âm Thanh (AudioCueManager)**
+  - [x] Tạo class `AudioCueManager` lắng nghe State Stream từ `WorkoutPlayerBloc`.
+  - [x] Định nghĩa các quy tắc kích hoạt âm thanh tự động:
+    - [x] **Bắt đầu chuẩn bị:** Đọc: *"Chuẩn bị: [Tên bài tập]"*.
+    - [x] **Đếm ngược 3 giây cuối:** Phát `beep_high` ở các giây 3, 2, 1 (hoặc đọc *"Ba, Hai, Một"*).
+    - [x] **Bắt đầu hiệp (0s):** Phát `whistle_start` + đọc *"Bắt đầu!"* hoặc *"Hiệp [X], Bắt đầu!"*.
+    - [x] **Chuyển sang nghỉ (Rest):** Phát `rest_chime` + đọc *"Nghỉ [Y] giây"*.
+    - [x] **Nhắc nhở sắp hết giờ nghỉ:** Khi còn đúng 10 giây nghỉ, phát tiếng bíp nhẹ + đọc *"Còn 10 giây, chuẩn bị [Bài kế tiếp]"*.
+    - [x] **Hoàn thành bài tập:** Phát `victory_fanfare` + đọc *"Chúc mừng bạn đã hoàn thành bài tập xuất sắc!"*.
+  - [x] Thiết lập logic chống chồng lấn (No Overlap): Nếu TTS đang đọc thì tạm dừng âm SFX phụ hoặc đợi dứt câu.
 
-- [ ] **TASK-4.4: Cấu hình Quản Lý Audio Focus & Ducking**
-  - [ ] Tạo `lib/core/services/audio_focus_service.dart` sử dụng `audio_session`.
-  - [ ] Cấu hình Android Audio Attributes: `contentType = speech`, `usage = assistant`.
-  - [ ] Thiết lập `AudioSessionCategory.playback` với tùy chọn `duckOthers`:
+- [x] **TASK-4.4: Cấu hình Quản Lý Audio Focus & Ducking**
+  - [x] Tạo `lib/core/services/audio_focus_service.dart` sử dụng `audio_session`.
+  - [x] Cấu hình Android Audio Attributes: `contentType = speech`, `usage = assistant`.
+  - [x] Thiết lập `AudioSessionCategory.playback` với tùy chọn `duckOthers`:
     - Khi Hamino Workout phát tiếng nói, âm lượng nhạc từ các app khác (Spotify, Zing MP3, Apple Music) tự động giảm xuống 25%.
     - Khi giọng đọc kết thúc, âm lượng nhạc nền tự động phục hồi về 100%.
 
