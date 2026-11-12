@@ -205,6 +205,17 @@ class WorkoutPlayerBloc extends Bloc<WorkoutPlayerEvent, WorkoutPlayerState> {
     final int nextRound = isLastExInRound ? currentState.currentRound + 1 : currentState.currentRound;
     final int nextExIndex = isLastExInRound ? 0 : currentState.currentExerciseIndex + 1;
 
+    // Nếu không có thời gian nghỉ (defaultRestSeconds <= 0), chuyển ngay sang bài tiếp theo
+    if (_workout.defaultRestSeconds <= 0) {
+      _startWorkStep(
+        round: nextRound,
+        exerciseIndex: nextExIndex,
+        totalElapsed: totalElapsed,
+        emit: emit,
+      );
+      return;
+    }
+
     // Vào thời gian nghỉ (Rest)
     final now = DateTime.now();
     _stepStartedAt = now;

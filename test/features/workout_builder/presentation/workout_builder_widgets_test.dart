@@ -51,7 +51,9 @@ void main() {
       ],
     );
 
-    testWidgets('Renders all workout information and chips correctly', (tester) async {
+    testWidgets('Renders all workout information and chips correctly', (
+      tester,
+    ) async {
       await tester.pumpWidget(wrapWidget(WorkoutCard(workout: sampleWorkout)));
 
       expect(find.text('EMOM'), findsOneWidget);
@@ -72,10 +74,11 @@ void main() {
 
     testWidgets('Triggers onStart when tapping BẮT ĐẦU TẬP', (tester) async {
       bool started = false;
-      await tester.pumpWidget(wrapWidget(WorkoutCard(
-        workout: sampleWorkout,
-        onStart: () => started = true,
-      )));
+      await tester.pumpWidget(
+        wrapWidget(
+          WorkoutCard(workout: sampleWorkout, onStart: () => started = true),
+        ),
+      );
 
       await tester.tap(find.text('BẮT ĐẦU TẬP'));
       await tester.pump();
@@ -83,12 +86,18 @@ void main() {
       expect(started, isTrue);
     });
 
-    testWidgets('Triggers onFavoriteToggle when tapping star icon', (tester) async {
+    testWidgets('Triggers onFavoriteToggle when tapping star icon', (
+      tester,
+    ) async {
       bool toggled = false;
-      await tester.pumpWidget(wrapWidget(WorkoutCard(
-        workout: sampleWorkout,
-        onFavoriteToggle: () => toggled = true,
-      )));
+      await tester.pumpWidget(
+        wrapWidget(
+          WorkoutCard(
+            workout: sampleWorkout,
+            onFavoriteToggle: () => toggled = true,
+          ),
+        ),
+      );
 
       await tester.tap(find.byIcon(Icons.star_border_rounded));
       await tester.pump();
@@ -96,12 +105,15 @@ void main() {
       expect(toggled, isTrue);
     });
 
-    testWidgets('Opens popup menu with Edit, Duplicate and Delete', (tester) async {
+    testWidgets('Opens popup menu with Edit, Duplicate and Delete', (
+      tester,
+    ) async {
       bool editTapped = false;
-      await tester.pumpWidget(wrapWidget(WorkoutCard(
-        workout: sampleWorkout,
-        onEdit: () => editTapped = true,
-      )));
+      await tester.pumpWidget(
+        wrapWidget(
+          WorkoutCard(workout: sampleWorkout, onEdit: () => editTapped = true),
+        ),
+      );
 
       await tester.tap(find.byIcon(Icons.more_vert_rounded));
       await tester.pumpAndSettle();
@@ -118,15 +130,21 @@ void main() {
   });
 
   group('EmptyStateWidget Tests (TASK-2.1)', () {
-    testWidgets('Renders empty state with category and callbacks', (tester) async {
+    testWidgets('Renders empty state with category and callbacks', (
+      tester,
+    ) async {
       bool created = false;
       bool reset = false;
 
-      await tester.pumpWidget(wrapWidget(EmptyStateWidget(
-        selectedCategory: WorkoutCategory.cardio,
-        onCreateWorkout: () => created = true,
-        onResetFilter: () => reset = true,
-      )));
+      await tester.pumpWidget(
+        wrapWidget(
+          EmptyStateWidget(
+            selectedCategory: WorkoutCategory.cardio,
+            onCreateWorkout: () => created = true,
+            onResetFilter: () => reset = true,
+          ),
+        ),
+      );
 
       expect(find.text('CHƯA CÓ BÀI TẬP CARDIO'), findsOneWidget);
       expect(find.text('TẠO BÀI TẬP MỚI'), findsOneWidget);
@@ -156,13 +174,17 @@ void main() {
     testWidgets('Renders exercise item and handles delete tap', (tester) async {
       bool deleted = false;
 
-      await tester.pumpWidget(wrapWidget(ExerciseListItem(
-        exercise: sampleExercise,
-        index: 0,
-        workoutId: 'w-1',
-        onDelete: () => deleted = true,
-        onUpdate: (_) {},
-      )));
+      await tester.pumpWidget(
+        wrapWidget(
+          ExerciseListItem(
+            exercise: sampleExercise,
+            index: 0,
+            workoutId: 'w-1',
+            onDelete: () => deleted = true,
+            onUpdate: (_) {},
+          ),
+        ),
+      );
 
       expect(find.text('Pull-up'), findsOneWidget);
       expect(find.text('12 reps'), findsOneWidget);
@@ -178,50 +200,62 @@ void main() {
   });
 
   group('ExerciseFormDialog Tests (TASK-2.4)', () {
-    testWidgets('Renders modal and switches between reps and hold mode', (tester) async {
-      await tester.pumpWidget(MaterialApp(
-        theme: AppTheme.darkTheme,
-        home: Scaffold(
-          body: Builder(
-            builder: (ctx) => Center(
-              child: ElevatedButton(
-                onPressed: () => ExerciseFormDialog.show(ctx, workoutId: 'test-w'),
-                child: const Text('OPEN'),
+    testWidgets('Renders modal and switches between reps and hold mode', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.darkTheme,
+          home: Scaffold(
+            body: Builder(
+              builder: (ctx) => Center(
+                child: ElevatedButton(
+                  onPressed: () =>
+                      ExerciseFormDialog.show(ctx, workoutId: 'test-w'),
+                  child: const Text('OPEN'),
+                ),
               ),
             ),
           ),
         ),
-      ));
+      );
 
       await tester.tap(find.text('OPEN'));
       await tester.pumpAndSettle();
 
       expect(find.text('THÊM ĐỘNG TÁC'), findsOneWidget);
       expect(find.text('Theo số lần'), findsOneWidget);
-      expect(find.text('Theo giây giữ'), findsOneWidget);
+      expect(find.text('Theo giây'), findsOneWidget);
 
       // Switch to hold mode
-      await tester.tap(find.text('Theo giây giữ'));
+      await tester.tap(find.text('Theo giây'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Số giây giữ (hold) *'), findsOneWidget);
+      expect(find.text('Số giây *'), findsOneWidget);
     });
   });
 
   group('WorkoutTargetSummaryCard Tests', () {
-    testWidgets('Renders empty state hint when exercises list is empty', (tester) async {
-      await tester.pumpWidget(wrapWidget(const WorkoutTargetSummaryCard(
-        exercises: [],
-        targetRounds: 4,
-      )));
+    testWidgets('Renders empty state hint when exercises list is empty', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        wrapWidget(
+          const WorkoutTargetSummaryCard(exercises: [], targetRounds: 4),
+        ),
+      );
 
       expect(
-        find.text('Thêm động tác để xem chi tiết số rep và thời gian giữ mục tiêu từng động tác.'),
+        find.text(
+          'Thêm động tác để xem chi tiết số rep và thời gian giữ mục tiêu từng động tác.',
+        ),
         findsOneWidget,
       );
     });
 
-    testWidgets('Calculates total reps across all rounds correctly', (tester) async {
+    testWidgets('Calculates total reps across all rounds correctly', (
+      tester,
+    ) async {
       const exercises = [
         ExerciseEntity(
           id: 'e1',
@@ -241,10 +275,11 @@ void main() {
         ),
       ];
 
-      await tester.pumpWidget(wrapWidget(const WorkoutTargetSummaryCard(
-        exercises: exercises,
-        targetRounds: 5,
-      )));
+      await tester.pumpWidget(
+        wrapWidget(
+          const WorkoutTargetSummaryCard(exercises: exercises, targetRounds: 5),
+        ),
+      );
 
       // Hiển thị chi tiết từng động tác thay vì cộng gộp
       expect(find.text('MỤC TIÊU TỪNG ĐỘNG TÁC'), findsOneWidget);
@@ -260,96 +295,109 @@ void main() {
       expect(find.text('TỔNG SỐ REPS'), findsNothing);
     });
 
-    testWidgets('Calculates total hold seconds converted to minutes per exercise', (tester) async {
-      const exercises = [
-        ExerciseEntity(
-          id: 'e1',
-          workoutId: 'w1',
-          name: 'Handstand Hold',
-          defaultReps: 0,
-          holdSeconds: 30,
-          orderIndex: 0,
-        ),
-      ];
+    testWidgets(
+      'Calculates total hold seconds converted to minutes per exercise',
+      (tester) async {
+        const exercises = [
+          ExerciseEntity(
+            id: 'e1',
+            workoutId: 'w1',
+            name: 'Handstand Hold',
+            defaultReps: 0,
+            holdSeconds: 30,
+            orderIndex: 0,
+          ),
+        ];
 
-      await tester.pumpWidget(wrapWidget(const WorkoutTargetSummaryCard(
-        exercises: exercises,
-        targetRounds: 5,
-      )));
+        await tester.pumpWidget(
+          wrapWidget(
+            const WorkoutTargetSummaryCard(
+              exercises: exercises,
+              targetRounds: 5,
+            ),
+          ),
+        );
 
-      // Total hold = 30s * 5 = 150s = 2 phút 30 giây
-      expect(find.text('MỤC TIÊU TỪNG ĐỘNG TÁC'), findsOneWidget);
-      expect(find.text('Handstand Hold'), findsOneWidget);
-      expect(find.text('= 2 phút 30 giây'), findsOneWidget);
-      expect(find.text('30s/hiệp × 5 hiệp'), findsOneWidget);
-      expect(find.text('5 SETS'), findsOneWidget);
-      expect(find.text('TỔNG SỐ REPS'), findsNothing);
-    });
+        // Total hold = 30s * 5 = 150s = 2 phút 30 giây
+        expect(find.text('MỤC TIÊU TỪNG ĐỘNG TÁC'), findsOneWidget);
+        expect(find.text('Handstand Hold'), findsOneWidget);
+        expect(find.text('= 2 phút 30 giây'), findsOneWidget);
+        expect(find.text('30s/hiệp × 5 hiệp'), findsOneWidget);
+        expect(find.text('5 SETS'), findsOneWidget);
+        expect(find.text('TỔNG SỐ REPS'), findsNothing);
+      },
+    );
 
-    testWidgets('Calculates user specific example: Push up, Pull ups, Plank, Swat hold', (tester) async {
-      const exercises = [
-        ExerciseEntity(
-          id: 'e1',
-          workoutId: 'w1',
-          name: 'Push up',
-          defaultReps: 10,
-          holdSeconds: 0,
-          orderIndex: 0,
-        ),
-        ExerciseEntity(
-          id: 'e2',
-          workoutId: 'w1',
-          name: 'Pull ups',
-          defaultReps: 20,
-          holdSeconds: 0,
-          orderIndex: 1,
-        ),
-        ExerciseEntity(
-          id: 'e3',
-          workoutId: 'w1',
-          name: 'Plank',
-          defaultReps: 0,
-          holdSeconds: 120,
-          orderIndex: 2,
-        ),
-        ExerciseEntity(
-          id: 'e4',
-          workoutId: 'w1',
-          name: 'Swat hold',
-          defaultReps: 0,
-          holdSeconds: 60,
-          orderIndex: 3,
-        ),
-      ];
+    testWidgets(
+      'Calculates user specific example: Push up, Pull ups, Plank, Swat hold',
+      (tester) async {
+        const exercises = [
+          ExerciseEntity(
+            id: 'e1',
+            workoutId: 'w1',
+            name: 'Push up',
+            defaultReps: 10,
+            holdSeconds: 0,
+            orderIndex: 0,
+          ),
+          ExerciseEntity(
+            id: 'e2',
+            workoutId: 'w1',
+            name: 'Pull ups',
+            defaultReps: 20,
+            holdSeconds: 0,
+            orderIndex: 1,
+          ),
+          ExerciseEntity(
+            id: 'e3',
+            workoutId: 'w1',
+            name: 'Plank',
+            defaultReps: 0,
+            holdSeconds: 120,
+            orderIndex: 2,
+          ),
+          ExerciseEntity(
+            id: 'e4',
+            workoutId: 'w1',
+            name: 'Swat hold',
+            defaultReps: 0,
+            holdSeconds: 60,
+            orderIndex: 3,
+          ),
+        ];
 
-      await tester.pumpWidget(wrapWidget(const WorkoutTargetSummaryCard(
-        exercises: exercises,
-        targetRounds: 5,
-      )));
+        await tester.pumpWidget(
+          wrapWidget(
+            const WorkoutTargetSummaryCard(
+              exercises: exercises,
+              targetRounds: 5,
+            ),
+          ),
+        );
 
-      // Kiểm tra chính xác theo yêu cầu người dùng:
-      // Push up: = 50 rep (10 * 5)
-      expect(find.text('Push up'), findsOneWidget);
-      expect(find.text('= 50 rep'), findsOneWidget);
-      expect(find.text('10 rep/hiệp × 5 hiệp'), findsOneWidget);
+        // Kiểm tra chính xác theo yêu cầu người dùng:
+        // Push up: = 50 rep (10 * 5)
+        expect(find.text('Push up'), findsOneWidget);
+        expect(find.text('= 50 rep'), findsOneWidget);
+        expect(find.text('10 rep/hiệp × 5 hiệp'), findsOneWidget);
 
-      // Pull ups: = 100 rep (20 * 5)
-      expect(find.text('Pull ups'), findsOneWidget);
-      expect(find.text('= 100 rep'), findsOneWidget);
-      expect(find.text('20 rep/hiệp × 5 hiệp'), findsOneWidget);
+        // Pull ups: = 100 rep (20 * 5)
+        expect(find.text('Pull ups'), findsOneWidget);
+        expect(find.text('= 100 rep'), findsOneWidget);
+        expect(find.text('20 rep/hiệp × 5 hiệp'), findsOneWidget);
 
-      // Plank: = 10 phút (120s * 5 = 600s = 10 phút)
-      expect(find.text('Plank'), findsOneWidget);
-      expect(find.text('= 10 phút'), findsOneWidget);
-      expect(find.text('120s/hiệp × 5 hiệp'), findsOneWidget);
+        // Plank: = 10 phút (120s * 5 = 600s = 10 phút)
+        expect(find.text('Plank'), findsOneWidget);
+        expect(find.text('= 10 phút'), findsOneWidget);
+        expect(find.text('120s/hiệp × 5 hiệp'), findsOneWidget);
 
-      // Swat hold: = 5 phút (60s * 5 = 300s = 5 phút)
-      expect(find.text('Swat hold'), findsOneWidget);
-      expect(find.text('= 5 phút'), findsOneWidget);
-      expect(find.text('60s/hiệp × 5 hiệp'), findsOneWidget);
+        // Swat hold: = 5 phút (60s * 5 = 300s = 5 phút)
+        expect(find.text('Swat hold'), findsOneWidget);
+        expect(find.text('= 5 phút'), findsOneWidget);
+        expect(find.text('60s/hiệp × 5 hiệp'), findsOneWidget);
 
-      expect(find.text('20 SETS'), findsOneWidget);
-    });
+        expect(find.text('20 SETS'), findsOneWidget);
+      },
+    );
   });
 }
-

@@ -257,7 +257,7 @@ class _ExerciseFormDialogState extends State<ExerciseFormDialog> {
                               ),
                               const SizedBox(width: 6),
                               Text(
-                                'Theo giây giữ',
+                                'Theo giây',
                                 style: AppTypography.labelMedium.copyWith(
                                   color: _isHoldMode
                                       ? AppColors.restBlue
@@ -303,7 +303,7 @@ class _ExerciseFormDialogState extends State<ExerciseFormDialog> {
                     color: AppColors.textWhite,
                   ),
                   decoration: _inputDecoration(
-                    'Giây giữ (hold) - tuỳ chọn, 0 để bỏ qua',
+                    'Giây - tuỳ chọn, 0 để bỏ qua',
                     Icons.timer_outlined,
                   ),
                 ),
@@ -318,7 +318,7 @@ class _ExerciseFormDialogState extends State<ExerciseFormDialog> {
                     color: AppColors.textWhite,
                   ),
                   decoration: _inputDecoration(
-                    'Số giây giữ (hold) *',
+                    'Số giây *',
                     Icons.timer_outlined,
                   ),
                   validator: (v) {
@@ -343,7 +343,7 @@ class _ExerciseFormDialogState extends State<ExerciseFormDialog> {
                   'Ghi chú kỹ thuật (tuỳ chọn)',
                   Icons.notes_outlined,
                 ),
-                maxLines: 2,
+                maxLines: 3,
               ),
 
               const SizedBox(height: 24),

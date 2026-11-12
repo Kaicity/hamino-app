@@ -47,7 +47,7 @@ void main() {
       expect(bloc.state.name, '');
       expect(bloc.state.category, WorkoutCategory.endurance);
       expect(bloc.state.prepareSeconds, 10);
-      expect(bloc.state.defaultRestSeconds, 60);
+      expect(bloc.state.defaultRestSeconds, 0);
       expect(bloc.state.timeCapSeconds, 0);
       expect(bloc.state.targetRounds, 1);
       expect(bloc.state.exercises, isEmpty);
@@ -133,17 +133,17 @@ void main() {
       );
     });
 
-    test('Target rounds clamping works (between 1 and 30)', () async {
+    test('Target rounds clamping works (between 1 and 100)', () async {
       bloc.add(const UpdateTargetRoundsEvent(0));
       await expectLater(
         bloc.stream,
         emits(predicate<WorkoutBuilderState>((s) => s.targetRounds == 1)),
       );
 
-      bloc.add(const UpdateTargetRoundsEvent(50));
+      bloc.add(const UpdateTargetRoundsEvent(150));
       await expectLater(
         bloc.stream,
-        emits(predicate<WorkoutBuilderState>((s) => s.targetRounds == 30)),
+        emits(predicate<WorkoutBuilderState>((s) => s.targetRounds == 100)),
       );
     });
 

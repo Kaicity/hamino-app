@@ -150,7 +150,7 @@ class WorkoutBuilderState extends Equatable {
     this.category = WorkoutCategory.endurance,
     this.description,
     this.prepareSeconds = 10,
-    this.defaultRestSeconds = 60,
+    this.defaultRestSeconds = 0,
     this.timeCapSeconds = 0,
     this.targetRounds = 1,
     this.exercises = const [],
@@ -335,12 +335,15 @@ class WorkoutBuilderBloc extends Bloc<WorkoutBuilderEvent, WorkoutBuilderState> 
 
   void _onUpdateTimeCapSeconds(
       UpdateTimeCapSecondsEvent event, Emitter<WorkoutBuilderState> emit) {
-    emit(state.copyWith(timeCapSeconds: event.seconds));
+    emit(state.copyWith(
+      timeCapSeconds: event.seconds,
+      isTimeCapped: event.seconds > 0,
+    ));
   }
 
   void _onUpdateTargetRounds(
       UpdateTargetRoundsEvent event, Emitter<WorkoutBuilderState> emit) {
-    final rounds = event.rounds.clamp(1, 30);
+    final rounds = event.rounds.clamp(1, 100);
     emit(state.copyWith(targetRounds: rounds));
   }
 
