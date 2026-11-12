@@ -4,18 +4,20 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/services/audio_cue_manager.dart';
 import '../../../../core/services/audio_service_interface.dart';
+import '../../../../core/services/notification_service_interface.dart';
 import '../../../../core/services/tts_service_interface.dart';
+import '../../../../core/services/wakelock_service_interface.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/time_formatter.dart';
 import '../../../../features/workout_builder/domain/entities/workout_category.dart';
 import '../../../../features/workout_builder/domain/entities/workout_template_entity.dart';
+import '../../../history/presentation/pages/workout_summary_page.dart';
 import '../bloc/workout_player_bloc.dart';
 import '../bloc/workout_player_event.dart';
 import '../bloc/workout_player_state.dart';
 import '../widgets/lock_overlay.dart';
 import '../widgets/next_up_card.dart';
-import '../widgets/workout_completed_view.dart';
 import '../widgets/workout_progress_bar.dart';
 
 /// Màn hình tập luyện toàn màn hình (Immersive Workout Player Screen)
@@ -40,12 +42,30 @@ class _WorkoutPlayerView extends StatefulWidget {
   State<_WorkoutPlayerView> createState() => _WorkoutPlayerViewState();
 }
 
-class _WorkoutPlayerViewState extends State<_WorkoutPlayerView> {
+class _WorkoutPlayerViewState extends State<_WorkoutPlayerView>
+    with WidgetsBindingObserver {
   late final AudioCueManager _audioCueManager;
+  late final IWakelockService _wakelockService;
+  late final INotificationService _notificationService;
+  late final DateTime _startedAt;
+  bool _isInBackground = false;
 
   @override
   void initState() {
     super.initState();
+    _startedAt = DateTime.now();
+    WidgetsBinding.instance.addObserver(this);
+
+    _wakelockService = sl.isRegistered<IWakelockService>()
+        ? sl<IWakelockService>()
+        : const _NoOpWakelockService();
+    _wakelockService.enable();
+
+    _notificationService = sl.isRegistered<INotificationService>()
+        ? sl<INotificationService>()
+        : const _NoOpNotificationService();
+    _notificationService.initialize();
+
     if (sl.isRegistered<AudioCueManager>()) {
       _audioCueManager = sl<AudioCueManager>();
     } else {
@@ -58,36 +78,106 @@ class _WorkoutPlayerViewState extends State<_WorkoutPlayerView> {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.hidden) {
+      _isInBackground = true;
+    } else if (state == AppLifecycleState.resumed) {
+      _isInBackground = false;
+    }
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _wakelockService.disable();
+    _notificationService.cancelWorkoutNotification();
     _audioCueManager.dispose();
     super.dispose();
   }
 
-  Future<bool> _confirmExit(BuildContext context) async {
-    final confirmed = await showDialog<bool>(
+  void _updateNotificationWithState(WorkoutPlayerState state) {
+    if (state is PlayerCompleted) {
+      _notificationService.cancelWorkoutNotification();
+      return;
+    }
+
+    final workoutName = state.workout?.name ?? 'Hamino Workout';
+    final exName = state.currentExercise?.name ?? '';
+    final title = exName.isNotEmpty ? '$workoutName • $exName' : workoutName;
+
+    String body = '';
+    if (state is PlayerPrepare) {
+      body = '[CHUẨN BỊ] Còn ${state.remainingSeconds}s';
+    } else if (state is PlayerWork) {
+      final isHold = state.currentExercise?.isStaticHold ?? false;
+      final timeStr =
+          isHold ? '${state.remainingSeconds}s' : '${state.elapsedSeconds}s';
+      body =
+          '[ĐANG TẬP] $timeStr (Hiệp ${state.currentRound}/${state.totalRounds})';
+    } else if (state is PlayerRest) {
+      body =
+          '[ĐANG NGHỈ] Còn ${state.remainingSeconds}s (Hiệp ${state.currentRound}/${state.totalRounds})';
+    } else if (state is PlayerPaused) {
+      body = '[TẠM DỪNG] Đang tạm dừng buổi tập';
+    }
+
+    if (body.isNotEmpty) {
+      _notificationService.showWorkoutNotification(
+        title: title,
+        body: body,
+      );
+    }
+  }
+
+  int _getCompletedRounds(WorkoutPlayerState state) {
+    if (state is PlayerCompleted) {
+      return state.completedRounds;
+    }
+    return (state.currentRound - 1).clamp(0, state.totalRounds);
+  }
+
+  Future<void> _handleExit(BuildContext context, WorkoutPlayerState state) async {
+    final result = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surfaceDark,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text('Dừng buổi tập?', style: AppTypography.headlineSmall),
         content: Text(
-          'Tiến độ của buổi tập này sẽ kết thúc. Bạn có chắc muốn thoát không?',
+          'Tiến độ của buổi tập này sẽ kết thúc. Bạn có muốn lưu lại kết quả đã hoàn thành không?',
           style: AppTypography.bodyMedium,
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
+            onPressed: () => Navigator.of(ctx).pop('continue'),
             child: Text(
               'TIẾP TỤC TẬP',
-              style: AppTypography.labelMedium.copyWith(color: AppColors.workGreen),
+              style: AppTypography.labelMedium.copyWith(
+                color: AppColors.workGreen,
+              ),
             ),
           ),
           TextButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
+            onPressed: () => Navigator.of(ctx).pop('discard'),
             child: Text(
-              'DỪNG & THOÁT',
+              'THOÁT KHÔNG LƯU',
               style: AppTypography.labelMedium.copyWith(
-                color: AppColors.errorRed,
+                color: AppColors.textMuted,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(ctx).pop('save'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.warningOrange,
+              foregroundColor: Colors.black,
+            ),
+            child: Text(
+              'LƯU KẾT QUẢ',
+              style: AppTypography.labelMedium.copyWith(
                 fontWeight: FontWeight.w800,
               ),
             ),
@@ -95,7 +185,26 @@ class _WorkoutPlayerViewState extends State<_WorkoutPlayerView> {
         ],
       ),
     );
-    return confirmed ?? false;
+
+    if (!context.mounted) return;
+
+    if (result == 'discard') {
+      Navigator.of(context).pop();
+    } else if (result == 'save') {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => WorkoutSummaryPage(
+            workout: state.workout,
+            totalElapsedSeconds: state.totalElapsedSeconds,
+            completedRounds: _getCompletedRounds(state),
+            totalRounds: state.totalRounds,
+            reason: CompletionReason.finishedEarly,
+            startedAt: _startedAt,
+            finishedAt: DateTime.now(),
+          ),
+        ),
+      );
+    }
   }
 
   Color _getBackgroundColor(WorkoutPlayerState state) {
@@ -159,7 +268,8 @@ class _WorkoutPlayerViewState extends State<_WorkoutPlayerView> {
     }
     if (state is PlayerPaused) {
       final prev = state.previousState;
-      if (prev is PlayerWork && !(prev.currentExercise?.isStaticHold ?? false)) {
+      if (prev is PlayerWork &&
+          !(prev.currentExercise?.isStaticHold ?? false)) {
         return TimeFormatter.formatSeconds(prev.elapsedSeconds);
       }
       return TimeFormatter.formatSeconds(prev.remainingSeconds);
@@ -172,19 +282,26 @@ class _WorkoutPlayerViewState extends State<_WorkoutPlayerView> {
     return BlocConsumer<WorkoutPlayerBloc, WorkoutPlayerState>(
       listener: (context, state) {
         _audioCueManager.handleState(state);
+        if (_isInBackground) {
+          _updateNotificationWithState(state);
+        }
+        if (state is PlayerCompleted) {
+          _wakelockService.disable();
+          _notificationService.cancelWorkoutNotification();
+        }
       },
       builder: (context, state) {
         final bloc = context.read<WorkoutPlayerBloc>();
 
         if (state is PlayerCompleted) {
-          return Scaffold(
-            backgroundColor: AppColors.bgDark,
-            body: SafeArea(
-              child: WorkoutCompletedView(
-                state: state,
-                onFinish: () => Navigator.of(context).pop(),
-              ),
-            ),
+          return WorkoutSummaryPage(
+            workout: state.workout,
+            totalElapsedSeconds: state.totalElapsedSeconds,
+            completedRounds: state.completedRounds,
+            totalRounds: state.totalRounds,
+            reason: state.reason,
+            startedAt: _startedAt,
+            finishedAt: DateTime.now(),
           );
         }
 
@@ -198,10 +315,7 @@ class _WorkoutPlayerViewState extends State<_WorkoutPlayerView> {
           canPop: false,
           onPopInvokedWithResult: (didPop, _) async {
             if (didPop) return;
-            final shouldPop = await _confirmExit(context);
-            if (shouldPop && context.mounted) {
-              Navigator.of(context).pop();
-            }
+            await _handleExit(context, state);
           },
           child: Scaffold(
             backgroundColor: bgColor,
@@ -218,21 +332,23 @@ class _WorkoutPlayerViewState extends State<_WorkoutPlayerView> {
                           children: [
                             // Exit button
                             IconButton(
-                              icon: const Icon(Icons.close_rounded,
-                                  color: AppColors.textWhite, size: 26),
+                              icon: const Icon(
+                                Icons.close_rounded,
+                                color: AppColors.textWhite,
+                                size: 26,
+                              ),
                               tooltip: 'Thoát',
                               onPressed: () async {
-                                final shouldPop = await _confirmExit(context);
-                                if (shouldPop && context.mounted) {
-                                  Navigator.of(context).pop();
-                                }
+                                await _handleExit(context, state);
                               },
                             ),
 
                             // Round indicator (Header pill)
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 14, vertical: 6),
+                                horizontal: 14,
+                                vertical: 6,
+                              ),
                               decoration: BoxDecoration(
                                 color: AppColors.surfaceElevated,
                                 borderRadius: BorderRadius.circular(16),
@@ -267,7 +383,8 @@ class _WorkoutPlayerViewState extends State<_WorkoutPlayerView> {
                                       : 'Bật âm thanh & HLV',
                                   onPressed: () {
                                     setState(() {
-                                      final enabled = !_audioCueManager.isSfxEnabled;
+                                      final enabled =
+                                          !_audioCueManager.isSfxEnabled;
                                       _audioCueManager.isSfxEnabled = enabled;
                                       _audioCueManager.isTtsEnabled = enabled;
                                     });
@@ -312,7 +429,9 @@ class _WorkoutPlayerViewState extends State<_WorkoutPlayerView> {
                       AnimatedContainer(
                         duration: const Duration(milliseconds: 250),
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 18, vertical: 6),
+                          horizontal: 18,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: accentColor.withValues(alpha: 0.18),
                           borderRadius: BorderRadius.circular(20),
@@ -368,7 +487,9 @@ class _WorkoutPlayerViewState extends State<_WorkoutPlayerView> {
                         const SizedBox(height: 6),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 4),
+                            horizontal: 12,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: AppColors.surfaceElevated,
                             borderRadius: BorderRadius.circular(8),
@@ -390,8 +511,9 @@ class _WorkoutPlayerViewState extends State<_WorkoutPlayerView> {
                             padding: const EdgeInsets.symmetric(horizontal: 32),
                             child: Text(
                               currentEx.notes!,
-                              style: AppTypography.bodySmall
-                                  .copyWith(color: AppColors.textMuted),
+                              style: AppTypography.bodySmall.copyWith(
+                                color: AppColors.textMuted,
+                              ),
                               textAlign: TextAlign.center,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -414,19 +536,17 @@ class _WorkoutPlayerViewState extends State<_WorkoutPlayerView> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             _actionChip(
-                              label: '+10s Nghỉ',
+                              label: '10s Nghỉ',
                               icon: Icons.add_rounded,
                               color: AppColors.restBlue,
-                              onTap: () =>
-                                  bloc.add(const AddRestTimeEvent(10)),
+                              onTap: () => bloc.add(const AddRestTimeEvent(10)),
                             ),
                             const SizedBox(width: 14),
                             _actionChip(
-                              label: '+30s Nghỉ',
+                              label: '30s Nghỉ',
                               icon: Icons.add_rounded,
                               color: AppColors.restBlue,
-                              onTap: () =>
-                                  bloc.add(const AddRestTimeEvent(30)),
+                              onTap: () => bloc.add(const AddRestTimeEvent(30)),
                             ),
                           ],
                         ),
@@ -507,8 +627,7 @@ class _WorkoutPlayerViewState extends State<_WorkoutPlayerView> {
                   if (state.isScreenLocked)
                     Positioned.fill(
                       child: LockOverlay(
-                        onUnlock: () =>
-                            bloc.add(const ToggleScreenLockEvent()),
+                        onUnlock: () => bloc.add(const ToggleScreenLockEvent()),
                       ),
                     ),
                 ],
@@ -626,4 +745,26 @@ class _NoOpTtsService implements ITtsService {
   Future<bool> isLanguageAvailable(String languageCode) async => true;
 }
 
+class _NoOpWakelockService implements IWakelockService {
+  const _NoOpWakelockService();
+  @override
+  Future<void> enable() async {}
+  @override
+  Future<void> disable() async {}
+  @override
+  Future<bool> isEnabled() async => false;
+}
 
+class _NoOpNotificationService implements INotificationService {
+  const _NoOpNotificationService();
+  @override
+  Future<void> initialize() async {}
+  @override
+  Future<void> showWorkoutNotification({
+    required String title,
+    required String body,
+    bool isOngoing = true,
+  }) async {}
+  @override
+  Future<void> cancelWorkoutNotification() async {}
+}

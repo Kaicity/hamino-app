@@ -39,7 +39,10 @@ class DatabaseHelper {
         onCreate: _onCreate,
       );
     } catch (e, stackTrace) {
-      throw DatabaseException('Khởi tạo cơ sở dữ liệu SQLite thất bại: $e', stackTrace);
+      throw DatabaseException(
+        'Khởi tạo cơ sở dữ liệu SQLite thất bại: $e',
+        stackTrace,
+      );
     }
   }
 

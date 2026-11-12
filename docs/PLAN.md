@@ -53,8 +53,8 @@
 - [x] **Phase 1:** Cơ sở dữ liệu Cục bộ & Preset Mẫu Calisthenics *(4/4 Tasks - 16/16 Checklist Items)*
 - [x] **Phase 2:** Quản lý & Trình tạo Bài tập (Workout Builder CRUD) *(4/4 Tasks - 16/16 Checklist Items)*
 - [x] **Phase 3:** Bộ đếm giờ Chuẩn xác & Màn hình Tập luyện (Timer Engine & UI) *(5/5 Tasks - 18/18 Checklist Items)*
-- [ ] **Phase 4:** Hệ thống Giọng nói Thông minh (TTS) & Âm thanh (Audio Coach) *(0/4 Tasks - 0/15 Checklist Items)*
-- [ ] **Phase 5:** Wakelock, Chạy nền & Lịch sử Tập luyện *(0/4 Tasks - 0/14 Checklist Items)*
+- [x] **Phase 4:** Hệ thống Giọng nói Thông minh (TTS) & Âm thanh (Audio Coach) *(4/4 Tasks - 15/15 Checklist Items)*
+- [x] **Phase 5:** Wakelock, Chạy nền & Lịch sử Tập luyện *(4/4 Tasks - 14/14 Checklist Items)*
 - [ ] **Phase 6:** Cài đặt Hệ thống, Kiểm thử, Tối ưu & Hoàn thiện *(0/4 Tasks - 0/14 Checklist Items)*
 
 ---
@@ -349,36 +349,36 @@
 | **TASK-5.4** | Thông báo Chạy nền (Notification) | Hiển thị thông báo trạng thái timer khi chuyển app hoặc tắt màn hình. | Notification ngoài màn hình khóa cập nhật đúng số giây. | P2 |
 
 #### Checklist Chi Tiết Thực Hiện (Action Items)
-- [ ] **TASK-5.1: Tích hợp Giữ Sáng Màn Hình (Wakelock Service)**
-  - [ ] Tạo file `lib/core/services/wakelock_service.dart` bọc `wakelock_plus`.
-  - [ ] Gọi `WakelockPlus.enable()` tự động khi `WorkoutPlayerScreen` được khởi tạo (`initState`).
-  - [ ] Gọi `WakelockPlus.disable()` khi người dùng thoát hoặc hoàn thành bài tập (`dispose`).
-  - [ ] Bổ sung cờ cấu hình trong Settings cho phép người dùng tắt tính năng này nếu muốn tiết kiệm pin tối đa.
+- [x] **TASK-5.1: Tích hợp Giữ Sáng Màn Hình (Wakelock Service)**
+  - [x] Tạo file `lib/core/services/wakelock_service.dart` bọc `wakelock_plus`.
+  - [x] Gọi `WakelockPlus.enable()` tự động khi `WorkoutPlayerScreen` được khởi tạo (`initState`).
+  - [x] Gọi `WakelockPlus.disable()` khi người dùng thoát hoặc hoàn thành bài tập (`dispose`).
+  - [x] Bổ sung cờ cấu hình trong Settings cho phép người dùng tắt tính năng này nếu muốn tiết kiệm pin tối đa.
 
-- [ ] **TASK-5.2: Màn hình Tổng Kết Buổi Tập (Workout Summary Screen)**
-  - [ ] Tạo `WorkoutSummaryScreen` tự động mở ra khi BLoC chuyển trạng thái `PlayerCompleted` hoặc người dùng xác nhận dừng sớm.
-  - [ ] Hiển thị thông số tổng kết nổi bật:
+- [x] **TASK-5.2: Màn hình Tổng Kết Buổi Tập (Workout Summary Screen)**
+  - [x] Tạo `WorkoutSummaryScreen` tự động mở ra khi BLoC chuyển trạng thái `PlayerCompleted` hoặc người dùng xác nhận dừng sớm.
+  - [x] Hiển thị thông số tổng kết nổi bật:
     - Tổng thời gian tập luyện thực tế (Format: `X phút Y giây`).
     - Số hiệp đã hoàn thành trên tổng số hiệp mục tiêu (VD: `8 / 8 Hiệp - 100%`).
-  - [ ] Bảng đánh giá độ khó buổi tập (RPE Scale từ 1 đến 10) bằng Slider hoặc 5 biểu tượng trạng thái sức lực.
-  - [ ] Ô nhập nhật ký ngắn (Personal Notes: cảm giác cơ bắp, mức tạ, số rep tối đa đạt được).
-  - [ ] Nút "Lưu kết quả": Tạo bản ghi `WorkoutSessionRecordModel`, lưu vào SQLite và điều hướng về trang chủ kèm hiệu ứng chúc mừng.
+  - [x] Bảng đánh giá độ khó buổi tập (RPE Scale từ 1 đến 10) bằng Slider hoặc 5 biểu tượng trạng thái sức lực.
+  - [x] Ô nhập nhật ký ngắn (Personal Notes: cảm giác cơ bắp, mức tạ, số rep tối đa đạt được).
+  - [x] Nút "Lưu kết quả": Tạo bản ghi `WorkoutSessionRecordModel`, lưu vào SQLite và điều hướng về trang chủ kèm hiệu ứng chúc mừng.
 
-- [ ] **TASK-5.3: Màn hình Lịch Sử & Nhật Ký Tập Luyện (History & Stats Screen)**
-  - [ ] Tạo `HistoryBloc` truy vấn bảng `workout_sessions` từ database.
-  - [ ] Xây dựng giao diện Timeline lịch sử tập luyện xếp theo ngày mới nhất.
-  - [ ] Thiết kế `HistorySessionCard` hiển thị: Tên bài tập, Thể loại, Thời gian hoàn thành, Điểm đánh giá RPE.
-  - [ ] Thẻ thống kê nhanh trên đầu trang: "Tổng số buổi tuần này", "Tổng thời lượng vận động (phút)".
-  - [ ] Modal xem lại chi tiết bài tập cũ và nút xóa bản ghi lịch sử nếu muốn.
+- [x] **TASK-5.3: Màn hình Lịch Sử & Nhật Ký Tập Luyện (History & Stats Screen)**
+  - [x] Tạo `HistoryBloc` truy vấn bảng `workout_sessions` từ database.
+  - [x] Xây dựng giao diện Timeline lịch sử tập luyện xếp theo ngày mới nhất.
+  - [x] Thiết kế `HistorySessionCard` hiển thị: Tên bài tập, Thể loại, Thời gian hoàn thành, Điểm đánh giá RPE.
+  - [x] Thẻ thống kê nhanh trên đầu trang: "Tổng số buổi tuần này", "Tổng thời lượng vận động (phút)".
+  - [x] Modal xem lại chi tiết bài tập cũ và nút xóa bản ghi lịch sử nếu muốn.
 
-- [ ] **TASK-5.4: Thông Báo Trạng Thái Chạy Nền (Ongoing Timer Notification)**
-  - [ ] Tạo file `lib/core/services/notification_service.dart` sử dụng `flutter_local_notifications`.
-  - [ ] Cấu hình Notification Channel thể thao độ ưu tiên cao (`importance: max`, `ongoing: true`).
-  - [ ] Lắng nghe BLoC: Khi người dùng nhấn nút Home hoặc chuyển app, cập nhật notification hiển thị:
+- [x] **TASK-5.4: Thông Báo Trạng Thái Chạy Nền (Ongoing Timer Notification)**
+  - [x] Tạo file `lib/core/services/notification_service.dart` sử dụng `flutter_local_notifications`.
+  - [x] Cấu hình Notification Channel thể thao độ ưu tiên cao (`importance: max`, `ongoing: true`).
+  - [x] Lắng nghe BLoC: Khi người dùng nhấn nút Home hoặc chuyển app, cập nhật notification hiển thị:
     - Tiêu đề: Tên bài tập + Tên động tác hiện tại.
     - Nội dung: `[ĐANG TẬP] Còn 25s` hoặc `[ĐANG NGHỈ] Còn 45s (Hiệp 3/8)`.
-  - [ ] Thêm nút hành động nhanh (Action Buttons) ngay trên notification: Tạm dừng / Tiếp tục.
-  - [ ] Tự động hủy notification khi buổi tập hoàn thành hoặc bị hủy bỏ.
+  - [x] Thêm nút hành động nhanh (Action Buttons) ngay trên notification: Tạm dừng / Tiếp tục.
+  - [x] Tự động hủy notification khi buổi tập hoàn thành hoặc bị hủy bỏ.
 
 ---
 

@@ -5,8 +5,16 @@ import '../services/audio_focus_service.dart';
 import '../services/audio_service_interface.dart';
 import '../services/audio_sfx_service.dart';
 import '../services/audio_cue_manager.dart';
+import '../services/notification_service.dart';
+import '../services/notification_service_interface.dart';
 import '../services/tts_service.dart';
 import '../services/tts_service_interface.dart';
+import '../services/wakelock_service.dart';
+import '../services/wakelock_service_interface.dart';
+import '../../features/history/data/datasources/history_local_datasource.dart';
+import '../../features/history/data/repositories/history_repository_impl.dart';
+import '../../features/history/domain/repositories/history_repository.dart';
+import '../../features/history/presentation/bloc/history_bloc.dart';
 import '../../features/workout_builder/data/repositories/workout_repository_impl.dart';
 import '../../features/workout_builder/domain/repositories/workout_repository.dart';
 import '../../features/workout_builder/presentation/bloc/workout_catalog_bloc.dart';
@@ -44,6 +52,10 @@ Future<void> _initCore() async {
   sl.registerLazySingleton<IAudioService>(() => AudioSfxService());
   sl.registerLazySingleton<ITtsService>(() => TtsService());
   sl.registerLazySingleton<AudioFocusService>(() => AudioFocusService());
+
+  // Hardware & Background Services (Phase 5)
+  sl.registerLazySingleton<IWakelockService>(() => WakelockService());
+  sl.registerLazySingleton<INotificationService>(() => NotificationService());
 }
 
 /// Đăng ký dependencies cho tính năng Workout Builder (CRUD giáo án)
@@ -75,7 +87,16 @@ Future<void> _initWorkoutPlayer() async {
 
 /// Đăng ký dependencies cho tính năng History (Lịch sử buổi tập)
 Future<void> _initHistory() async {
-  // Sẽ được bổ sung tại Phase 5 (HistoryRepository, HistoryBloc)
+  // Data Source & Repository
+  sl.registerLazySingleton<HistoryLocalDataSource>(
+    () => HistoryLocalDataSourceImpl(sl<DatabaseHelper>()),
+  );
+  sl.registerLazySingleton<HistoryRepository>(
+    () => HistoryRepositoryImpl(sl<HistoryLocalDataSource>()),
+  );
+
+  // BLoC
+  sl.registerFactory(() => HistoryBloc(sl<HistoryRepository>()));
 }
 
 /// Đăng ký dependencies cho tính năng Settings (Cài đặt)

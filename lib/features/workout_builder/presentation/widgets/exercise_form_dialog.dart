@@ -10,11 +10,7 @@ class ExerciseFormDialog extends StatefulWidget {
   final ExerciseEntity? exercise;
   final String workoutId;
 
-  const ExerciseFormDialog({
-    super.key,
-    this.exercise,
-    required this.workoutId,
-  });
+  const ExerciseFormDialog({super.key, this.exercise, required this.workoutId});
 
   /// Mở dialog và trả về ExerciseEntity được tạo/chỉnh sửa, hoặc null nếu hủy
   static Future<ExerciseEntity?> show(
@@ -26,10 +22,8 @@ class ExerciseFormDialog extends StatefulWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => ExerciseFormDialog(
-        exercise: exercise,
-        workoutId: workoutId,
-      ),
+      builder: (_) =>
+          ExerciseFormDialog(exercise: exercise, workoutId: workoutId),
     );
   }
 
@@ -73,7 +67,8 @@ class _ExerciseFormDialogState extends State<ExerciseFormDialog> {
   void _switchToRepsMode() {
     setState(() {
       _isHoldMode = false;
-      if (int.tryParse(_repsController.text) == 0 || _repsController.text.isEmpty) {
+      if (int.tryParse(_repsController.text) == 0 ||
+          _repsController.text.isEmpty) {
         _repsController.text = '10';
       }
       _holdController.text = '0';
@@ -83,7 +78,8 @@ class _ExerciseFormDialogState extends State<ExerciseFormDialog> {
   void _switchToHoldMode() {
     setState(() {
       _isHoldMode = true;
-      if (int.tryParse(_holdController.text) == 0 || _holdController.text.isEmpty) {
+      if (int.tryParse(_holdController.text) == 0 ||
+          _holdController.text.isEmpty) {
         _holdController.text = '20';
       }
       _repsController.text = '0';
@@ -98,8 +94,9 @@ class _ExerciseFormDialogState extends State<ExerciseFormDialog> {
     final hold = _isHoldMode
         ? (int.tryParse(_holdController.text) ?? 20)
         : (int.tryParse(_holdController.text) ?? 0);
-    final notes =
-        _notesController.text.trim().isEmpty ? null : _notesController.text.trim();
+    final notes = _notesController.text.trim().isEmpty
+        ? null
+        : _notesController.text.trim();
 
     const uuid = Uuid();
     final result = ExerciseEntity(
@@ -159,9 +156,13 @@ class _ExerciseFormDialogState extends State<ExerciseFormDialog> {
               // Tên động tác
               TextFormField(
                 controller: _nameController,
-                style: AppTypography.bodyLarge.copyWith(color: AppColors.textWhite),
-                decoration:
-                    _inputDecoration('Tên động tác *', Icons.fitness_center_outlined),
+                style: AppTypography.bodyLarge.copyWith(
+                  color: AppColors.textWhite,
+                ),
+                decoration: _inputDecoration(
+                  'Tên động tác *',
+                  Icons.fitness_center_outlined,
+                ),
                 textCapitalization: TextCapitalization.sentences,
                 validator: (v) {
                   if (v == null || v.trim().isEmpty) {
@@ -191,9 +192,13 @@ class _ExerciseFormDialogState extends State<ExerciseFormDialog> {
                                 ? AppColors.workGreen.withValues(alpha: 0.2)
                                 : Colors.transparent,
                             borderRadius: const BorderRadius.horizontal(
-                                left: Radius.circular(11)),
+                              left: Radius.circular(11),
+                            ),
                             border: !_isHoldMode
-                                ? Border.all(color: AppColors.workGreen, width: 1.5)
+                                ? Border.all(
+                                    color: AppColors.workGreen,
+                                    width: 1.5,
+                                  )
                                 : null,
                           ),
                           child: Row(
@@ -231,9 +236,13 @@ class _ExerciseFormDialogState extends State<ExerciseFormDialog> {
                                 ? AppColors.restBlue.withValues(alpha: 0.2)
                                 : Colors.transparent,
                             borderRadius: const BorderRadius.horizontal(
-                                right: Radius.circular(11)),
+                              right: Radius.circular(11),
+                            ),
                             border: _isHoldMode
-                                ? Border.all(color: AppColors.restBlue, width: 1.5)
+                                ? Border.all(
+                                    color: AppColors.restBlue,
+                                    width: 1.5,
+                                  )
                                 : null,
                           ),
                           child: Row(
@@ -271,12 +280,18 @@ class _ExerciseFormDialogState extends State<ExerciseFormDialog> {
                 TextFormField(
                   controller: _repsController,
                   keyboardType: TextInputType.number,
-                  style: AppTypography.bodyLarge.copyWith(color: AppColors.textWhite),
-                  decoration:
-                      _inputDecoration('Số lần lặp (reps)', Icons.repeat_rounded),
+                  style: AppTypography.bodyLarge.copyWith(
+                    color: AppColors.textWhite,
+                  ),
+                  decoration: _inputDecoration(
+                    'Số lần lặp (reps)',
+                    Icons.repeat_rounded,
+                  ),
                   validator: (v) {
                     final n = int.tryParse(v ?? '');
-                    if (n == null || n <= 0) return 'Vui lòng nhập số lần hợp lệ';
+                    if (n == null || n <= 0) {
+                      return 'Vui lòng nhập số lần hợp lệ';
+                    }
                     return null;
                   },
                 ),
@@ -284,7 +299,9 @@ class _ExerciseFormDialogState extends State<ExerciseFormDialog> {
                 TextFormField(
                   controller: _holdController,
                   keyboardType: TextInputType.number,
-                  style: AppTypography.bodyLarge.copyWith(color: AppColors.textWhite),
+                  style: AppTypography.bodyLarge.copyWith(
+                    color: AppColors.textWhite,
+                  ),
                   decoration: _inputDecoration(
                     'Giây giữ (hold) - tuỳ chọn, 0 để bỏ qua',
                     Icons.timer_outlined,
@@ -297,12 +314,18 @@ class _ExerciseFormDialogState extends State<ExerciseFormDialog> {
                 TextFormField(
                   controller: _holdController,
                   keyboardType: TextInputType.number,
-                  style: AppTypography.bodyLarge.copyWith(color: AppColors.textWhite),
-                  decoration:
-                      _inputDecoration('Số giây giữ (hold) *', Icons.timer_outlined),
+                  style: AppTypography.bodyLarge.copyWith(
+                    color: AppColors.textWhite,
+                  ),
+                  decoration: _inputDecoration(
+                    'Số giây giữ (hold) *',
+                    Icons.timer_outlined,
+                  ),
                   validator: (v) {
                     final n = int.tryParse(v ?? '');
-                    if (n == null || n <= 0) return 'Vui lòng nhập số giây hợp lệ';
+                    if (n == null || n <= 0) {
+                      return 'Vui lòng nhập số giây hợp lệ';
+                    }
                     return null;
                   },
                 ),
@@ -313,7 +336,9 @@ class _ExerciseFormDialogState extends State<ExerciseFormDialog> {
               // Ghi chú
               TextFormField(
                 controller: _notesController,
-                style: AppTypography.bodyMedium.copyWith(color: AppColors.textWhite),
+                style: AppTypography.bodyMedium.copyWith(
+                  color: AppColors.textWhite,
+                ),
                 decoration: _inputDecoration(
                   'Ghi chú kỹ thuật (tuỳ chọn)',
                   Icons.notes_outlined,

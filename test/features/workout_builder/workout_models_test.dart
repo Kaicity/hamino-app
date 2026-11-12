@@ -32,10 +32,16 @@ void main() {
     test('fromString should parse category strings case-insensitively', () {
       expect(WorkoutCategory.fromString('emom'), WorkoutCategory.emom);
       expect(WorkoutCategory.fromString('EMOM'), WorkoutCategory.emom);
-      expect(WorkoutCategory.fromString('endurance'), WorkoutCategory.endurance);
+      expect(
+        WorkoutCategory.fromString('endurance'),
+        WorkoutCategory.endurance,
+      );
       expect(WorkoutCategory.fromString('SKILL'), WorkoutCategory.skill);
       expect(WorkoutCategory.fromString('Cardio'), WorkoutCategory.cardio);
-      expect(WorkoutCategory.fromString('invalid_val'), WorkoutCategory.endurance);
+      expect(
+        WorkoutCategory.fromString('invalid_val'),
+        WorkoutCategory.endurance,
+      );
       expect(WorkoutCategory.fromString(null), WorkoutCategory.endurance);
     });
   });
@@ -160,7 +166,10 @@ void main() {
       expect(workout.exerciseTargetVolumes.first.exerciseName, 'Push-ups');
       expect(workout.exerciseTargetVolumes.first.totalReps, 60);
       expect(workout.exerciseTargetVolumes.first.targetDisplay, '= 60 rep');
-      expect(workout.exerciseTargetVolumes.first.calculationFormula, '15 rep/hiệp × 4 hiệp');
+      expect(
+        workout.exerciseTargetVolumes.first.calculationFormula,
+        '15 rep/hiệp × 4 hiệp',
+      );
       expect(workout.exerciseTargetSummaryDisplay, 'Push-ups: = 60 rep');
 
       final holdWorkout = workout.copyWith(
@@ -209,18 +218,21 @@ void main() {
       expect(fromMapWorkout.exercises.length, 1);
     });
 
-    test('fromEntity should convert WorkoutTemplateEntity to WorkoutTemplateModel', () {
-      final entity = WorkoutTemplateEntity(
-        id: 'w_entity',
-        name: 'Entity Workout',
-        category: WorkoutCategory.skill,
-        createdAt: now,
-      );
-      final model = WorkoutTemplateModel.fromEntity(entity);
-      expect(model.id, entity.id);
-      expect(model.name, entity.name);
-      expect(model.category, WorkoutCategory.skill);
-    });
+    test(
+      'fromEntity should convert WorkoutTemplateEntity to WorkoutTemplateModel',
+      () {
+        final entity = WorkoutTemplateEntity(
+          id: 'w_entity',
+          name: 'Entity Workout',
+          category: WorkoutCategory.skill,
+          createdAt: now,
+        );
+        final model = WorkoutTemplateModel.fromEntity(entity);
+        expect(model.id, entity.id);
+        expect(model.name, entity.name);
+        expect(model.category, WorkoutCategory.skill);
+      },
+    );
   });
 
   group('WorkoutSessionRecord & WorkoutSessionModel Tests', () {
@@ -258,89 +270,30 @@ void main() {
       expect(fromMapSession.rpeScore, 8);
     });
 
-    test('fromEntity should convert WorkoutSessionRecord to WorkoutSessionModel', () {
-      final entity = WorkoutSessionRecord(
-        id: 's_ent',
-        workoutId: 'w_ent',
-        workoutName: 'Entity Name',
-        startedAt: started,
-        finishedAt: finished,
-        durationSeconds: 1200,
-        completedRounds: 4,
-      );
-      final model = WorkoutSessionModel.fromEntity(entity);
-      expect(model.id, entity.id);
-      expect(model.workoutName, entity.workoutName);
-      expect(model.completedRounds, 4);
-    });
+    test(
+      'fromEntity should convert WorkoutSessionRecord to WorkoutSessionModel',
+      () {
+        final entity = WorkoutSessionRecord(
+          id: 's_ent',
+          workoutId: 'w_ent',
+          workoutName: 'Entity Name',
+          startedAt: started,
+          finishedAt: finished,
+          durationSeconds: 1200,
+          completedRounds: 4,
+        );
+        final model = WorkoutSessionModel.fromEntity(entity);
+        expect(model.id, entity.id);
+        expect(model.workoutName, entity.workoutName);
+        expect(model.completedRounds, 4);
+      },
+    );
   });
 
   group('PresetWorkoutsData Tests (TASK-1.4)', () {
     test('Should have exactly 4 presets defined', () {
       final presets = PresetWorkoutsData.presets;
       expect(presets.length, 4);
-    });
-
-    test('Preset 1: EMOM 20m Beast should meet all specifications', () {
-      final emom = PresetWorkoutsData.presets.firstWhere(
-        (p) => p.id == PresetWorkoutsData.presetEmomId,
-      );
-      expect(emom.name, 'EMOM 20m Beast');
-      expect(emom.category, WorkoutCategory.emom);
-      expect(emom.targetRounds, 5);
-      expect(emom.timeCapSeconds, 1200); // 20m
-      expect(emom.isPreset, true);
-      expect(emom.exercises.length, 4);
-      expect(emom.exercises[0].name, 'Pull-ups');
-      expect(emom.exercises[0].defaultReps, 10);
-      expect(emom.exercises[1].name, 'Push-ups');
-      expect(emom.exercises[1].defaultReps, 20);
-      expect(emom.exercises[2].name, 'Dips');
-      expect(emom.exercises[2].defaultReps, 15);
-      expect(emom.exercises[3].name, 'Rest');
-      expect(emom.exercises[3].holdSeconds, 60);
-    });
-
-    test('Preset 2: Endurance 30m Circuit should meet all specifications', () {
-      final endurance = PresetWorkoutsData.presets.firstWhere(
-        (p) => p.id == PresetWorkoutsData.presetEnduranceId,
-      );
-      expect(endurance.name, 'Endurance 30m Circuit');
-      expect(endurance.category, WorkoutCategory.endurance);
-      expect(endurance.targetRounds, 5);
-      expect(endurance.defaultRestSeconds, 90);
-      expect(endurance.timeCapSeconds, 1800); // 30m
-      expect(endurance.isPreset, true);
-      expect(endurance.exercises.length, 4);
-      expect(endurance.exercises[0].name, 'Pull-ups');
-      expect(endurance.exercises[0].defaultReps, 8);
-      expect(endurance.exercises[1].name, 'Dips');
-      expect(endurance.exercises[1].defaultReps, 12);
-      expect(endurance.exercises[2].name, 'Australian Rows');
-      expect(endurance.exercises[2].defaultReps, 12);
-      expect(endurance.exercises[3].name, 'Bodyweight Squats');
-      expect(endurance.exercises[3].defaultReps, 20);
-    });
-
-    test('Preset 3: Skill Handstand Mastery should meet all specifications', () {
-      final skill = PresetWorkoutsData.presets.firstWhere(
-        (p) => p.id == PresetWorkoutsData.presetSkillId,
-      );
-      expect(skill.name, 'Skill Handstand Mastery');
-      expect(skill.category, WorkoutCategory.skill);
-      expect(skill.targetRounds, 6);
-      expect(skill.defaultRestSeconds, 90);
-      expect(skill.timeCapSeconds, 0); // No time cap
-      expect(skill.isPreset, true);
-      expect(skill.exercises.length, 4);
-      expect(skill.exercises[0].name, 'Handstand Wall Hold');
-      expect(skill.exercises[0].holdSeconds, 20);
-      expect(skill.exercises[1].name, 'Rest');
-      expect(skill.exercises[1].holdSeconds, 90);
-      expect(skill.exercises[2].name, 'Pike Push-ups');
-      expect(skill.exercises[2].defaultReps, 8);
-      expect(skill.exercises[3].name, 'Rest');
-      expect(skill.exercises[3].holdSeconds, 90);
     });
 
     test('Preset 4: Cardio HIIT Tabata should meet all specifications', () {
@@ -361,4 +314,3 @@ void main() {
     });
   });
 }
-

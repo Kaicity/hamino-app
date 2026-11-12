@@ -9,6 +9,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../widgets/empty_state_widget.dart';
 import '../widgets/workout_card.dart';
 import '../../../../features/workout_player/presentation/pages/workout_player_page.dart';
+import '../../../history/presentation/pages/history_page.dart';
 import 'workout_builder_page.dart';
 
 /// Màn hình danh sách bài tập - màn hình chính của ứng dụng
@@ -124,7 +125,13 @@ class _WorkoutCatalogView extends StatelessWidget {
                       icon: const Icon(Icons.history_rounded,
                           color: AppColors.textWhite),
                       tooltip: 'Lịch sử',
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const HistoryPage(),
+                          ),
+                        );
+                      },
                     ),
                     IconButton(
                       icon: const Icon(Icons.settings_outlined,

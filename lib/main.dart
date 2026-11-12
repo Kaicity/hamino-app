@@ -155,7 +155,10 @@ class _HomeScreenState extends State<HomeScreen> {
             slivers: [
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 16,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -204,9 +207,7 @@ class _HomeScreenState extends State<HomeScreen> {
               // Danh sách bài tập từ SQLite
               _buildWorkoutList(),
 
-              const SliverToBoxAdapter(
-                child: SizedBox(height: 32),
-              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 32)),
             ],
           ),
         ),
@@ -225,9 +226,7 @@ class _HomeScreenState extends State<HomeScreen> {
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: AppColors.workGreen.withValues(alpha: 0.35),
-        ),
+        border: Border.all(color: AppColors.workGreen.withValues(alpha: 0.35)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -323,7 +322,9 @@ class _HomeScreenState extends State<HomeScreen> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? color.withValues(alpha: 0.25) : AppColors.surfaceElevated,
+          color: isSelected
+              ? color.withValues(alpha: 0.25)
+              : AppColors.surfaceElevated,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected ? color : AppColors.borderDark,
@@ -371,7 +372,9 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: const EdgeInsets.all(32),
             child: Text(
               'Chưa có bài tập nào trong mục này',
-              style: AppTypography.bodyMedium.copyWith(color: AppColors.textMuted),
+              style: AppTypography.bodyMedium.copyWith(
+                color: AppColors.textMuted,
+              ),
             ),
           ),
         ),
@@ -381,19 +384,16 @@ class _HomeScreenState extends State<HomeScreen> {
     return SliverPadding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       sliver: SliverList(
-        delegate: SliverChildBuilderDelegate(
-          (context, index) {
-            final workout = _workouts[index];
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: _WorkoutPresetCard(
-                workout: workout,
-                onFavoriteToggle: () => _toggleFavorite(workout),
-              ),
-            );
-          },
-          childCount: _workouts.length,
-        ),
+        delegate: SliverChildBuilderDelegate((context, index) {
+          final workout = _workouts[index];
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: _WorkoutPresetCard(
+              workout: workout,
+              onFavoriteToggle: () => _toggleFavorite(workout),
+            ),
+          );
+        }, childCount: _workouts.length),
       ),
     );
   }
@@ -433,7 +433,10 @@ class _WorkoutPresetCard extends StatelessWidget {
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: catColor.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(8),
@@ -457,7 +460,10 @@ class _WorkoutPresetCard extends StatelessWidget {
                 if (workout.isPreset) ...[
                   const SizedBox(width: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.surfaceElevated,
                       borderRadius: BorderRadius.circular(6),
@@ -475,8 +481,12 @@ class _WorkoutPresetCard extends StatelessWidget {
                 const Spacer(),
                 IconButton(
                   icon: Icon(
-                    workout.isFavorite ? Icons.star_rounded : Icons.star_border_rounded,
-                    color: workout.isFavorite ? AppColors.starFavorite : AppColors.textMuted,
+                    workout.isFavorite
+                        ? Icons.star_rounded
+                        : Icons.star_border_rounded,
+                    color: workout.isFavorite
+                        ? AppColors.starFavorite
+                        : AppColors.textMuted,
                     size: 24,
                   ),
                   onPressed: onFavoriteToggle,
@@ -523,7 +533,10 @@ class _WorkoutPresetCard extends StatelessWidget {
               children: [
                 _buildMetric(Icons.repeat, '${workout.targetRounds} Hiệp'),
                 _buildMetric(Icons.timer_outlined, workout.timeCapDisplay),
-                _buildMetric(Icons.fitness_center_outlined, '${workout.totalExercises} Động tác'),
+                _buildMetric(
+                  Icons.fitness_center_outlined,
+                  '${workout.totalExercises} Động tác',
+                ),
               ],
             ),
           ),
@@ -570,7 +583,10 @@ class _WorkoutPresetCard extends StatelessWidget {
                           ),
                         ),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: ex.isStaticHold
                                 ? AppColors.restBlue.withValues(alpha: 0.15)
@@ -580,7 +596,9 @@ class _WorkoutPresetCard extends StatelessWidget {
                           child: Text(
                             ex.targetSummary,
                             style: AppTypography.labelSmall.copyWith(
-                              color: ex.isStaticHold ? AppColors.restBlue : AppColors.workGreen,
+                              color: ex.isStaticHold
+                                  ? AppColors.restBlue
+                                  : AppColors.workGreen,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
