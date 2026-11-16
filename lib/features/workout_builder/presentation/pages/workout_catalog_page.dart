@@ -11,6 +11,7 @@ import '../widgets/workout_card.dart';
 import '../../../../features/workout_player/presentation/pages/workout_player_page.dart';
 import '../../../history/presentation/pages/history_page.dart';
 import 'workout_builder_page.dart';
+import '../widgets/ai_import_bottom_sheet.dart';
 
 /// Màn hình danh sách bài tập - màn hình chính của ứng dụng
 class WorkoutCatalogPage extends StatelessWidget {
@@ -82,6 +83,165 @@ class _WorkoutCatalogView extends StatelessWidget {
     }
   }
 
+  void _openAiCreation(BuildContext context) {
+    final bloc = context.read<WorkoutCatalogBloc>();
+    AiImportBottomSheet.show(
+      context,
+      onApply: (parsed) async {
+        final result = await Navigator.of(context).push<bool>(
+          MaterialPageRoute(
+            builder: (_) => WorkoutBuilderPage(initialAiWorkout: parsed),
+          ),
+        );
+        if (result == true) {
+          bloc.add(const LoadCatalogEvent());
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  'Lưu bài tập thành công!',
+                  style: AppTypography.bodyMedium.copyWith(color: Colors.white),
+                ),
+                backgroundColor: AppColors.successGreen,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            );
+          }
+        }
+      },
+    );
+  }
+
+  void _showCreateOptions(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
+        decoration: const BoxDecoration(
+          color: AppColors.surfaceDark,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.borderDark,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'TẠO BÀI TẬP MỚI',
+              style: AppTypography.headlineSmall.copyWith(
+                color: AppColors.textWhite,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 16),
+            ListTile(
+              onTap: () {
+                Navigator.of(ctx).pop();
+                _openAiCreation(context);
+              },
+              leading: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppColors.workGreen.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.auto_awesome_rounded,
+                  color: AppColors.workGreen,
+                  size: 22,
+                ),
+              ),
+              title: Text(
+                'Nhập nhanh bằng Gemini AI ✨',
+                style: AppTypography.labelLarge.copyWith(
+                  color: AppColors.textWhite,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              subtitle: Text(
+                'Dán danh sách bài tập thô để AI tự động phân tích & điền dữ liệu',
+                style: AppTypography.bodySmall.copyWith(
+                  color: AppColors.textMuted,
+                  fontSize: 12,
+                ),
+              ),
+              trailing: const Icon(
+                Icons.arrow_forward_ios_rounded,
+                color: AppColors.textMuted,
+                size: 16,
+              ),
+              tileColor: AppColors.surfaceElevated,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+                side: BorderSide(
+                  color: AppColors.workGreen.withValues(alpha: 0.3),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            ListTile(
+              onTap: () {
+                Navigator.of(ctx).pop();
+                _navigateToBuilder(context, isNew: true);
+              },
+              leading: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceElevated,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.borderDark),
+                ),
+                child: const Icon(
+                  Icons.edit_note_rounded,
+                  color: AppColors.textWhite,
+                  size: 22,
+                ),
+              ),
+              title: Text(
+                'Tạo thủ công',
+                style: AppTypography.labelLarge.copyWith(
+                  color: AppColors.textWhite,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              subtitle: Text(
+                'Tự điền từng thông tin và thêm từng động tác một cách chi tiết',
+                style: AppTypography.bodySmall.copyWith(
+                  color: AppColors.textMuted,
+                  fontSize: 12,
+                ),
+              ),
+              trailing: const Icon(
+                Icons.arrow_forward_ios_rounded,
+                color: AppColors.textMuted,
+                size: 16,
+              ),
+              tileColor: AppColors.surfaceElevated,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+                side: const BorderSide(color: AppColors.borderDark),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -121,6 +281,14 @@ class _WorkoutCatalogView extends StatelessWidget {
                     ],
                   ),
                   actions: [
+                    IconButton(
+                      icon: const Icon(
+                        Icons.auto_awesome_rounded,
+                        color: AppColors.workGreen,
+                      ),
+                      tooltip: 'Tạo nhanh bằng Gemini AI',
+                      onPressed: () => _openAiCreation(context),
+                    ),
                     IconButton(
                       icon: const Icon(Icons.history_rounded,
                           color: AppColors.textWhite),
@@ -335,7 +503,7 @@ class _WorkoutCatalogView extends StatelessWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _navigateToBuilder(context, isNew: true),
+        onPressed: () => _showCreateOptions(context),
         backgroundColor: AppColors.workGreen,
         foregroundColor: Colors.black,
         tooltip: 'Tạo bài tập mới',

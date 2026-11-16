@@ -11,6 +11,7 @@ import '../services/tts_service.dart';
 import '../services/tts_service_interface.dart';
 import '../services/wakelock_service.dart';
 import '../services/wakelock_service_interface.dart';
+import '../services/gemini_service.dart';
 import '../../features/history/data/datasources/history_local_datasource.dart';
 import '../../features/history/data/repositories/history_repository_impl.dart';
 import '../../features/history/domain/repositories/history_repository.dart';
@@ -56,6 +57,9 @@ Future<void> _initCore() async {
   // Hardware & Background Services (Phase 5)
   sl.registerLazySingleton<IWakelockService>(() => WakelockService());
   sl.registerLazySingleton<INotificationService>(() => NotificationService());
+
+  // AI & Smart Assistance (Gemini API)
+  sl.registerLazySingleton<IGeminiService>(() => GeminiService());
 }
 
 /// Đăng ký dependencies cho tính năng Workout Builder (CRUD giáo án)

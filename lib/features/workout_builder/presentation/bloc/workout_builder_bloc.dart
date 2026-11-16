@@ -19,10 +19,33 @@ abstract class WorkoutBuilderEvent extends Equatable {
 
 class InitBuilderEvent extends WorkoutBuilderEvent {
   final WorkoutTemplateEntity? existingWorkout;
-  const InitBuilderEvent(this.existingWorkout);
+  final List<ExerciseEntity>? initialExercises;
+  final String? initialName;
+  final WorkoutCategory? initialCategory;
+  final int? initialTargetRounds;
+  final int? initialDefaultRestSeconds;
+  final String? initialDescription;
+
+  const InitBuilderEvent({
+    this.existingWorkout,
+    this.initialExercises,
+    this.initialName,
+    this.initialCategory,
+    this.initialTargetRounds,
+    this.initialDefaultRestSeconds,
+    this.initialDescription,
+  });
 
   @override
-  List<Object?> get props => [existingWorkout];
+  List<Object?> get props => [
+        existingWorkout,
+        initialExercises,
+        initialName,
+        initialCategory,
+        initialTargetRounds,
+        initialDefaultRestSeconds,
+        initialDescription,
+      ];
 }
 
 class UpdateNameEvent extends WorkoutBuilderEvent {
@@ -125,6 +148,40 @@ class ReorderExercisesEvent extends WorkoutBuilderEvent {
 
 class SaveWorkoutEvent extends WorkoutBuilderEvent {
   const SaveWorkoutEvent();
+}
+
+class ApplyParsedWorkoutEvent extends WorkoutBuilderEvent {
+  final String name;
+  final WorkoutCategory category;
+  final String? description;
+  final int prepareSeconds;
+  final int defaultRestSeconds;
+  final int timeCapSeconds;
+  final int targetRounds;
+  final List<ExerciseEntity> exercises;
+
+  const ApplyParsedWorkoutEvent({
+    required this.name,
+    required this.category,
+    this.description,
+    this.prepareSeconds = 10,
+    this.defaultRestSeconds = 60,
+    this.timeCapSeconds = 0,
+    this.targetRounds = 1,
+    required this.exercises,
+  });
+
+  @override
+  List<Object?> get props => [
+        name,
+        category,
+        description,
+        prepareSeconds,
+        defaultRestSeconds,
+        timeCapSeconds,
+        targetRounds,
+        exercises,
+      ];
 }
 
 // ─── State ────────────────────────────────────────────────────────────────────
@@ -275,13 +332,12 @@ class WorkoutBuilderBloc extends Bloc<WorkoutBuilderEvent, WorkoutBuilderState> 
     on<RemoveExerciseEvent>(_onRemoveExercise);
     on<ReorderExercisesEvent>(_onReorderExercises);
     on<SaveWorkoutEvent>(_onSaveWorkout);
+    on<ApplyParsedWorkoutEvent>(_onApplyParsedWorkout);
   }
 
   void _onInitBuilder(InitBuilderEvent event, Emitter<WorkoutBuilderState> emit) {
     final workout = event.existingWorkout;
-    if (workout == null) {
-      emit(const WorkoutBuilderState());
-    } else {
+    if (workout != null) {
       emit(WorkoutBuilderState(
         editingId: workout.id,
         name: workout.name,
@@ -294,6 +350,17 @@ class WorkoutBuilderBloc extends Bloc<WorkoutBuilderEvent, WorkoutBuilderState> 
         exercises: List.from(workout.exercises),
         isTimeCapped: workout.timeCapSeconds > 0,
       ));
+    } else if (event.initialExercises != null) {
+      emit(WorkoutBuilderState(
+        name: event.initialName ?? '',
+        category: event.initialCategory ?? WorkoutCategory.endurance,
+        description: event.initialDescription,
+        targetRounds: event.initialTargetRounds ?? 1,
+        defaultRestSeconds: event.initialDefaultRestSeconds ?? 60,
+        exercises: List.from(event.initialExercises!),
+      ));
+    } else {
+      emit(const WorkoutBuilderState());
     }
   }
 
@@ -438,5 +505,23 @@ class WorkoutBuilderBloc extends Bloc<WorkoutBuilderEvent, WorkoutBuilderState> 
     } catch (e) {
       emit(state.copyWith(isSaving: false, errorMessage: e.toString()));
     }
+  }
+
+  void _onApplyParsedWorkout(
+    ApplyParsedWorkoutEvent event,
+    Emitter<WorkoutBuilderState> emit,
+  ) {
+    emit(state.copyWith(
+      name: event.name,
+      category: event.category,
+      description: event.description,
+      prepareSeconds: event.prepareSeconds,
+      defaultRestSeconds: event.defaultRestSeconds,
+      timeCapSeconds: event.timeCapSeconds,
+      isTimeCapped: event.timeCapSeconds > 0,
+      targetRounds: event.targetRounds,
+      exercises: event.exercises,
+      clearError: true,
+    ));
   }
 }

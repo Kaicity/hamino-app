@@ -11,17 +11,44 @@ import '../../../../core/theme/app_typography.dart';
 import '../widgets/exercise_form_dialog.dart';
 import '../widgets/exercise_list_item.dart';
 import '../widgets/workout_target_summary_card.dart';
+import '../widgets/ai_import_bottom_sheet.dart';
+import '../../data/models/ai_parsed_workout.dart';
 
 /// Màn hình tạo mới hoặc chỉnh sửa một bài tập
 class WorkoutBuilderPage extends StatelessWidget {
   final WorkoutTemplateEntity? workout;
+  final AiParsedWorkout? initialAiWorkout;
 
-  const WorkoutBuilderPage({super.key, this.workout});
+  const WorkoutBuilderPage({
+    super.key,
+    this.workout,
+    this.initialAiWorkout,
+  });
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => sl<WorkoutBuilderBloc>()..add(InitBuilderEvent(workout)),
+      create: (_) {
+        final bloc = sl<WorkoutBuilderBloc>();
+        if (workout != null) {
+          bloc.add(InitBuilderEvent(existingWorkout: workout));
+        } else if (initialAiWorkout != null) {
+          final workoutId = const Uuid().v4();
+          bloc.add(
+            InitBuilderEvent(
+              initialName: initialAiWorkout!.name,
+              initialCategory: initialAiWorkout!.category,
+              initialDescription: initialAiWorkout!.description,
+              initialTargetRounds: initialAiWorkout!.targetRounds,
+              initialDefaultRestSeconds: initialAiWorkout!.defaultRestSeconds,
+              initialExercises: initialAiWorkout!.toExerciseEntities(workoutId),
+            ),
+          );
+        } else {
+          bloc.add(const InitBuilderEvent());
+        }
+        return bloc;
+      },
       child: _WorkoutBuilderView(isEditing: workout != null),
     );
   }
@@ -134,6 +161,51 @@ class _WorkoutBuilderViewState extends State<_WorkoutBuilderView> {
     return result ?? false;
   }
 
+  void _openAiImport(BuildContext context, WorkoutBuilderBloc bloc) {
+    AiImportBottomSheet.show(
+      context,
+      onApply: (parsed) {
+        final exercises = parsed.toExerciseEntities(_workoutId);
+        bloc.add(
+          ApplyParsedWorkoutEvent(
+            name: parsed.name,
+            category: parsed.category,
+            description: parsed.description,
+            prepareSeconds: parsed.prepareSeconds,
+            defaultRestSeconds: parsed.defaultRestSeconds,
+            timeCapSeconds: parsed.timeCapSeconds,
+            targetRounds: parsed.targetRounds,
+            exercises: exercises,
+          ),
+        );
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle_rounded, color: Colors.black, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Đã nạp ${exercises.length} động tác từ Gemini AI! Bạn có thể kiểm tra và điều chỉnh trước khi lưu.',
+                    style: AppTypography.bodySmall.copyWith(
+                      color: Colors.black,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: AppColors.workGreen,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<WorkoutBuilderBloc, WorkoutBuilderState>(
@@ -179,6 +251,15 @@ class _WorkoutBuilderViewState extends State<_WorkoutBuilderView> {
               style: AppTypography.headlineMedium,
             ),
             actions: [
+              IconButton(
+                onPressed: () => _openAiImport(context, bloc),
+                icon: const Icon(
+                  Icons.auto_awesome_rounded,
+                  color: AppColors.workGreen,
+                  size: 22,
+                ),
+                tooltip: 'Nhập nhanh bằng Gemini AI',
+              ),
               state.isSaving
                   ? const Padding(
                       padding: EdgeInsets.symmetric(horizontal: 16),
@@ -215,6 +296,91 @@ class _WorkoutBuilderViewState extends State<_WorkoutBuilderView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // ── AI Smart Import Banner ────────────────────────────────
+                Container(
+                  margin: const EdgeInsets.only(bottom: 20),
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        AppColors.workGreen.withValues(alpha: 0.15),
+                        AppColors.surfaceElevated,
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: AppColors.workGreen.withValues(alpha: 0.35),
+                      width: 1.2,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: AppColors.workGreen.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(
+                          Icons.auto_awesome_rounded,
+                          color: AppColors.workGreen,
+                          size: 22,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Nhập nhanh bằng Gemini AI',
+                              style: AppTypography.labelLarge.copyWith(
+                                color: AppColors.textWhite,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Dán danh sách bài tập thô để tự động bóc tách',
+                              style: AppTypography.bodySmall.copyWith(
+                                color: AppColors.textMuted,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      ElevatedButton(
+                        onPressed: () => _openAiImport(context, bloc),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.workGreen,
+                          foregroundColor: Colors.black,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          elevation: 0,
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        child: Text(
+                          'NHẬP AI',
+                          style: AppTypography.labelSmall.copyWith(
+                            color: Colors.black,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
                 // ── Section 1: Thông tin bài tập ──────────────────────────
                 _sectionTitle('THÔNG TIN BÀI TẬP'),
                 const SizedBox(height: 12),
@@ -551,7 +717,7 @@ class _WorkoutBuilderViewState extends State<_WorkoutBuilderView> {
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
                       color: AppColors.surfaceElevated,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(16),
                       border: Border.all(
                         color: AppColors.borderDark,
                         style: BorderStyle.solid,
@@ -572,14 +738,92 @@ class _WorkoutBuilderViewState extends State<_WorkoutBuilderView> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Nhấn "THÊM ĐỘNG TÁC" để thiết kế giáo án',
+                            'Dán danh sách bài tập để AI tự bóc tách hoặc thêm thủ công',
                             style: AppTypography.bodySmall,
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              ElevatedButton.icon(
+                                onPressed: () => _openAiImport(context, bloc),
+                                icon: const Icon(
+                                  Icons.auto_awesome_rounded,
+                                  color: Colors.black,
+                                  size: 18,
+                                ),
+                                label: Text(
+                                  'NHẬP BẰNG AI ✨',
+                                  style: AppTypography.labelMedium.copyWith(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.workGreen,
+                                  foregroundColor: Colors.black,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 12,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  elevation: 0,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              OutlinedButton.icon(
+                                onPressed: () async {
+                                  final exerciseId = const Uuid().v4();
+                                  final result = await ExerciseFormDialog.show(
+                                    context,
+                                    workoutId: _workoutId,
+                                  );
+                                  if (result != null) {
+                                    bloc.add(
+                                      AddExerciseEvent(
+                                        result.copyWith(
+                                          id: exerciseId,
+                                          orderIndex: 0,
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                },
+                                icon: const Icon(
+                                  Icons.add_rounded,
+                                  color: AppColors.textWhite,
+                                  size: 18,
+                                ),
+                                label: Text(
+                                  'Thủ công',
+                                  style: AppTypography.labelMedium.copyWith(
+                                    color: AppColors.textWhite,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                    vertical: 12,
+                                  ),
+                                  side: const BorderSide(
+                                    color: AppColors.borderDark,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
                     ),
                   )
-                else
+                else ...[
                   ReorderableListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
@@ -637,54 +881,85 @@ class _WorkoutBuilderViewState extends State<_WorkoutBuilderView> {
                       );
                     },
                   ),
-
-                const SizedBox(height: 12),
-
-                // Nút thêm động tác
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: () async {
-                      final exerciseId = const Uuid().v4();
-                      final result = await ExerciseFormDialog.show(
-                        context,
-                        workoutId: _workoutId,
-                      );
-                      if (result != null) {
-                        bloc.add(
-                          AddExerciseEvent(
-                            result.copyWith(
-                              id: exerciseId,
-                              orderIndex: state.exercises.length,
+                  const SizedBox(height: 12),
+                  // Hàng nút: Thêm thủ công & Nhập thêm bằng AI
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () async {
+                            final exerciseId = const Uuid().v4();
+                            final result = await ExerciseFormDialog.show(
+                              context,
+                              workoutId: _workoutId,
+                            );
+                            if (result != null) {
+                              bloc.add(
+                                AddExerciseEvent(
+                                  result.copyWith(
+                                    id: exerciseId,
+                                    orderIndex: state.exercises.length,
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                          icon: const Icon(
+                            Icons.add_rounded,
+                            color: AppColors.workGreen,
+                            size: 18,
+                          ),
+                          label: Text(
+                            'THÊM ĐỘNG TÁC',
+                            style: AppTypography.labelMedium.copyWith(
+                              color: AppColors.workGreen,
+                              fontWeight: FontWeight.w800,
                             ),
                           ),
-                        );
-                      }
-                    },
-                    icon: const Icon(
-                      Icons.add_rounded,
-                      color: AppColors.workGreen,
-                      size: 20,
-                    ),
-                    label: Text(
-                      'THÊM ĐỘNG TÁC',
-                      style: AppTypography.labelMedium.copyWith(
-                        color: AppColors.workGreen,
-                        fontWeight: FontWeight.w800,
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            side: const BorderSide(
+                              color: AppColors.workGreen,
+                              width: 1.5,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      side: const BorderSide(
-                        color: AppColors.workGreen,
-                        width: 1.5,
+                      const SizedBox(width: 10),
+                      OutlinedButton.icon(
+                        onPressed: () => _openAiImport(context, bloc),
+                        icon: const Icon(
+                          Icons.auto_awesome_rounded,
+                          color: AppColors.workGreen,
+                          size: 18,
+                        ),
+                        label: Text(
+                          'NHẬP AI',
+                          style: AppTypography.labelMedium.copyWith(
+                            color: AppColors.workGreen,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 14,
+                          ),
+                          side: BorderSide(
+                            color: AppColors.workGreen.withValues(alpha: 0.6),
+                            width: 1.2,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
                       ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
+                    ],
                   ),
-                ),
+                ],
 
                 const SizedBox(height: 28),
 
