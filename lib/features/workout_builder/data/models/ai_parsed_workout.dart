@@ -5,6 +5,8 @@ import '../../domain/entities/workout_category.dart';
 
 /// Model biểu diễn bài tập được trích xuất từ Gemini AI
 class AiParsedWorkout {
+  final bool isValid;
+  final String? rejectionReason;
   final String name;
   final WorkoutCategory category;
   final String? description;
@@ -15,6 +17,8 @@ class AiParsedWorkout {
   final List<AiParsedExercise> exercises;
 
   const AiParsedWorkout({
+    this.isValid = true,
+    this.rejectionReason,
     required this.name,
     required this.category,
     this.description,
@@ -45,6 +49,11 @@ class AiParsedWorkout {
 
   /// Parse từ JSON map trả về từ Gemini
   factory AiParsedWorkout.fromJson(Map<String, dynamic> json) {
+    final isValid = json['isValid'] as bool? ??
+        json['isValidWorkout'] as bool? ??
+        true;
+    final rejectionReason = json['rejectionReason'] as String?;
+
     final rawCategory = json['category']?.toString();
     final parsedCategory = WorkoutCategory.fromString(rawCategory);
 
@@ -54,9 +63,11 @@ class AiParsedWorkout {
         .toList();
 
     return AiParsedWorkout(
+      isValid: isValid,
+      rejectionReason: rejectionReason,
       name: (json['name'] as String?)?.trim().isNotEmpty == true
           ? (json['name'] as String).trim()
-          : 'Bài tập mới (AI)',
+          : (isValid ? 'Bài tập mới (AI)' : ''),
       category: parsedCategory,
       description: json['description'] as String?,
       prepareSeconds: (json['prepareSeconds'] as num?)?.toInt() ?? 10,
@@ -69,6 +80,8 @@ class AiParsedWorkout {
 
   Map<String, dynamic> toJson() {
     return {
+      'isValid': isValid,
+      'rejectionReason': rejectionReason,
       'name': name,
       'category': category.name,
       'description': description,

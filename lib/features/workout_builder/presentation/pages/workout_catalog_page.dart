@@ -30,8 +30,11 @@ class WorkoutCatalogPage extends StatelessWidget {
 class _WorkoutCatalogView extends StatelessWidget {
   const _WorkoutCatalogView();
 
-  void _navigateToBuilder(BuildContext context,
-      {required bool isNew, String? workoutId}) async {
+  void _navigateToBuilder(
+    BuildContext context, {
+    required bool isNew,
+    String? workoutId,
+  }) async {
     final bloc = context.read<WorkoutCatalogBloc>();
 
     if (isNew) {
@@ -49,16 +52,18 @@ class _WorkoutCatalogView extends StatelessWidget {
               ),
               backgroundColor: AppColors.successGreen,
               behavior: SnackBarBehavior.floating,
-              shape:
-                  RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
           );
         }
       }
     } else {
       final state = bloc.state;
-      final workout =
-          state.allWorkouts.where((w) => w.id == workoutId).firstOrNull;
+      final workout = state.allWorkouts
+          .where((w) => w.id == workoutId)
+          .firstOrNull;
       if (workout == null) return;
 
       final result = await Navigator.of(context).push<bool>(
@@ -75,8 +80,9 @@ class _WorkoutCatalogView extends StatelessWidget {
               ),
               backgroundColor: AppColors.successGreen,
               behavior: SnackBarBehavior.floating,
-              shape:
-                  RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
           );
         }
@@ -167,7 +173,7 @@ class _WorkoutCatalogView extends StatelessWidget {
                 ),
               ),
               title: Text(
-                'Nhập nhanh bằng Gemini AI ✨',
+                'Nhập nhanh bằng Hami AI ✨',
                 style: AppTypography.labelLarge.copyWith(
                   color: AppColors.textWhite,
                   fontWeight: FontWeight.w700,
@@ -262,8 +268,10 @@ class _WorkoutCatalogView extends StatelessWidget {
                   title: Row(
                     children: [
                       Container(
-                        padding:
-                            const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.workGreen,
                           borderRadius: BorderRadius.circular(6),
@@ -291,8 +299,10 @@ class _WorkoutCatalogView extends StatelessWidget {
                       onPressed: () => _openAiCreation(context),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.history_rounded,
-                          color: AppColors.textWhite),
+                      icon: const Icon(
+                        Icons.history_rounded,
+                        color: AppColors.textWhite,
+                      ),
                       tooltip: 'Lịch sử',
                       onPressed: () {
                         Navigator.of(context).push(
@@ -303,8 +313,10 @@ class _WorkoutCatalogView extends StatelessWidget {
                       },
                     ),
                     IconButton(
-                      icon: const Icon(Icons.settings_outlined,
-                          color: AppColors.textWhite),
+                      icon: const Icon(
+                        Icons.settings_outlined,
+                        color: AppColors.textWhite,
+                      ),
                       tooltip: 'Cài đặt',
                       onPressed: () {
                         Navigator.of(context).push(
@@ -365,17 +377,18 @@ class _WorkoutCatalogView extends StatelessWidget {
                                     bloc.add(const FilterByCategoryEvent(null)),
                               ),
                               const SizedBox(width: 8),
-                              ...WorkoutCategory.values.map((cat) => Padding(
-                                    padding: const EdgeInsets.only(right: 8),
-                                    child: _buildCategoryChip(
-                                      label: cat.displayName.toUpperCase(),
-                                      isSelected:
-                                          state.selectedCategory == cat,
-                                      color: cat.color,
-                                      onTap: () =>
-                                          bloc.add(FilterByCategoryEvent(cat)),
-                                    ),
-                                  )),
+                              ...WorkoutCategory.values.map(
+                                (cat) => Padding(
+                                  padding: const EdgeInsets.only(right: 8),
+                                  child: _buildCategoryChip(
+                                    label: cat.displayName.toUpperCase(),
+                                    isSelected: state.selectedCategory == cat,
+                                    color: cat.color,
+                                    onTap: () =>
+                                        bloc.add(FilterByCategoryEvent(cat)),
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -420,8 +433,9 @@ class _WorkoutCatalogView extends StatelessWidget {
                 if (state is CatalogLoading)
                   const SliverFillRemaining(
                     child: Center(
-                      child:
-                          CircularProgressIndicator(color: AppColors.workGreen),
+                      child: CircularProgressIndicator(
+                        color: AppColors.workGreen,
+                      ),
                     ),
                   )
                 else if (state is CatalogError)
@@ -432,13 +446,17 @@ class _WorkoutCatalogView extends StatelessWidget {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.error_outline_rounded,
-                                color: AppColors.errorRed, size: 48),
+                            const Icon(
+                              Icons.error_outline_rounded,
+                              color: AppColors.errorRed,
+                              size: 48,
+                            ),
                             const SizedBox(height: 12),
                             Text(
                               state.errorMessage ?? 'Đã xảy ra lỗi',
-                              style: AppTypography.bodyMedium
-                                  .copyWith(color: AppColors.errorRed),
+                              style: AppTypography.bodyMedium.copyWith(
+                                color: AppColors.errorRed,
+                              ),
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 16),
@@ -446,12 +464,16 @@ class _WorkoutCatalogView extends StatelessWidget {
                               onPressed: () =>
                                   bloc.add(const LoadCatalogEvent()),
                               style: OutlinedButton.styleFrom(
-                                side:
-                                    const BorderSide(color: AppColors.workGreen),
+                                side: const BorderSide(
+                                  color: AppColors.workGreen,
+                                ),
                               ),
-                              child: Text('Thử lại',
-                                  style: AppTypography.labelMedium.copyWith(
-                                      color: AppColors.workGreen)),
+                              child: Text(
+                                'Thử lại',
+                                style: AppTypography.labelMedium.copyWith(
+                                  color: AppColors.workGreen,
+                                ),
+                              ),
                             ),
                           ],
                         ),
@@ -472,36 +494,38 @@ class _WorkoutCatalogView extends StatelessWidget {
                   SliverPadding(
                     padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
                     sliver: SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (ctx, index) {
-                          final workout = state.filteredWorkouts[index];
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 16),
-                            child: WorkoutCard(
-                              workout: workout,
-                              onStart: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (_) =>
-                                        WorkoutPlayerPage(workout: workout),
-                                  ),
-                                );
-                              },
-                              onEdit: () => _navigateToBuilder(ctx,
-                                  isNew: false, workoutId: workout.id),
-                              onDelete: () =>
-                                  bloc.add(DeleteWorkoutEvent(workout.id)),
-                              onDuplicate: () =>
-                                  bloc.add(DuplicateWorkoutEvent(workout.id)),
-                              onFavoriteToggle: () => bloc.add(
-                                ToggleFavoriteEvent(
-                                    workout.id, !workout.isFavorite),
+                      delegate: SliverChildBuilderDelegate((ctx, index) {
+                        final workout = state.filteredWorkouts[index];
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: WorkoutCard(
+                            workout: workout,
+                            onStart: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      WorkoutPlayerPage(workout: workout),
+                                ),
+                              );
+                            },
+                            onEdit: () => _navigateToBuilder(
+                              ctx,
+                              isNew: false,
+                              workoutId: workout.id,
+                            ),
+                            onDelete: () =>
+                                bloc.add(DeleteWorkoutEvent(workout.id)),
+                            onDuplicate: () =>
+                                bloc.add(DuplicateWorkoutEvent(workout.id)),
+                            onFavoriteToggle: () => bloc.add(
+                              ToggleFavoriteEvent(
+                                workout.id,
+                                !workout.isFavorite,
                               ),
                             ),
-                          );
-                        },
-                        childCount: state.filteredWorkouts.length,
-                      ),
+                          ),
+                        );
+                      }, childCount: state.filteredWorkouts.length),
                     ),
                   ),
               ],

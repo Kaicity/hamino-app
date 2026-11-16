@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../core/di/injection_container.dart';
+import '../../../../core/error/exceptions.dart';
 import '../../../../core/services/gemini_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../data/models/ai_parsed_workout.dart';
 
-/// Bottom sheet thông minh cho phép người dùng dán danh sách bài tập thô,
-/// sử dụng Gemini API để phân tích tự động thành dữ liệu có cấu trúc.
+/// Bottom sheet thông minh cho phép người dùng nhập ngữ cảnh hoặc dán danh sách bài tập thô,
+/// sử dụng Gemini AI để đánh giá tính hợp lệ và tự động phân tích / tạo bài tập Calisthenics có cấu trúc.
 class AiImportBottomSheet extends StatefulWidget {
   final Function(AiParsedWorkout parsedWorkout) onApply;
 
@@ -36,14 +37,15 @@ class _AiImportBottomSheetState extends State<AiImportBottomSheet> {
 
   bool _isLoading = false;
   String? _errorMessage;
+  String? _invalidContextReason;
   String? _currentApiKey;
   AiParsedWorkout? _parsedResult;
 
   static const String _sampleWorkoutText = '''CADIOR DAY - 4 SET
-1. Nâng chân -15 reps
+1. Nâng chân - 15 reps
 2. Gập bụng ngược - 15 reps
 3. Plank - 45 giây
-4. Bicycle Crunc - 20 reps
+4. Bicycle Crunch - 20 reps
 5. Hollow Body Hold - 20
 6. V-Up - 10-15 reps
 7. Đá chân rung - 30 giây
@@ -76,7 +78,16 @@ class _AiImportBottomSheetState extends State<AiImportBottomSheet> {
     final text = _textController.text.trim();
     if (text.isEmpty) {
       setState(() {
-        _errorMessage = 'Vui lòng dán hoặc nhập danh sách bài tập thô.';
+        _errorMessage = 'Vui lòng dán danh sách bài tập hoặc nhập ngữ cảnh bài tập Calisthenics.';
+        _invalidContextReason = null;
+      });
+      return;
+    }
+
+    if (text.length < 5) {
+      setState(() {
+        _errorMessage = 'Nội dung quá ngắn. Vui lòng cung cấp chi tiết hơn về danh sách hoặc yêu cầu bài tập Calisthenics.';
+        _invalidContextReason = null;
       });
       return;
     }
@@ -89,6 +100,7 @@ class _AiImportBottomSheetState extends State<AiImportBottomSheet> {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
+      _invalidContextReason = null;
     });
 
     try {
@@ -97,6 +109,17 @@ class _AiImportBottomSheetState extends State<AiImportBottomSheet> {
         setState(() {
           _isLoading = false;
           _parsedResult = result;
+          _errorMessage = null;
+          _invalidContextReason = null;
+        });
+      }
+    } on InvalidWorkoutContextException catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _invalidContextReason = e.message;
+          _errorMessage = null;
+          _parsedResult = null;
         });
       }
     } catch (e) {
@@ -104,6 +127,8 @@ class _AiImportBottomSheetState extends State<AiImportBottomSheet> {
         setState(() {
           _isLoading = false;
           _errorMessage = e.toString().replaceFirst('Exception: ', '');
+          _invalidContextReason = null;
+          _parsedResult = null;
         });
       }
     }
@@ -226,6 +251,7 @@ class _AiImportBottomSheetState extends State<AiImportBottomSheet> {
       _textController.text = data.text!.trim();
       setState(() {
         _errorMessage = null;
+        _invalidContextReason = null;
       });
     }
   }
@@ -234,6 +260,7 @@ class _AiImportBottomSheetState extends State<AiImportBottomSheet> {
     _textController.text = _sampleWorkoutText;
     setState(() {
       _errorMessage = null;
+      _invalidContextReason = null;
     });
   }
 
@@ -298,7 +325,7 @@ class _AiImportBottomSheetState extends State<AiImportBottomSheet> {
                           ),
                         ),
                         Text(
-                          'Phân tích tạo bài tập từ văn bản',
+                          'Phân tích & thiết kế giáo án Calisthenics',
                           style: AppTypography.bodySmall.copyWith(
                             color: AppColors.textMuted,
                           ),
@@ -344,7 +371,7 @@ class _AiImportBottomSheetState extends State<AiImportBottomSheet> {
     );
   }
 
-  /// Giao diện nhập văn bản thô
+  /// Giao diện nhập văn bản thô hoặc ngữ cảnh bài tập
   Widget _buildInputView() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -396,7 +423,7 @@ class _AiImportBottomSheetState extends State<AiImportBottomSheet> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'DÁN VĂN BẢN DANH SÁCH BÀI TẬP:',
+              'NHẬP NGỮ CẢNH HOẶC DÁN BÀI TẬP:',
               style: AppTypography.labelSmall.copyWith(
                 color: AppColors.textMuted,
                 letterSpacing: 1.1,
@@ -461,14 +488,23 @@ class _AiImportBottomSheetState extends State<AiImportBottomSheet> {
         TextField(
           controller: _textController,
           maxLines: 8,
+          onChanged: (_) {
+            if (_errorMessage != null || _invalidContextReason != null) {
+              setState(() {
+                _errorMessage = null;
+                _invalidContextReason = null;
+              });
+            }
+          },
           style: AppTypography.bodyMedium.copyWith(
             color: AppColors.textWhite,
             height: 1.4,
           ),
           decoration: InputDecoration(
-            hintText: 'Ví dụ:\nCADIOR DAY - 4 SET\n1. Nâng chân - 15 reps\n2. Plank - 45 giây\n...',
+            hintText: 'Ví dụ 1 (Dán danh sách bài tập):\nCADIOR DAY - 4 SET\n1. Nâng chân - 15 reps\n2. Plank - 45 giây\n3. Bicycle Crunch - 20 reps\n\nVí dụ 2 (Nhập ngữ cảnh muốn tập):\nBuổi tập Calisthenics ngực và tay sau 4 hiệp cho người mới bắt đầu tại công viên',
             hintStyle: AppTypography.bodyMedium.copyWith(
               color: AppColors.textDisabled,
+              height: 1.3,
             ),
             filled: true,
             fillColor: AppColors.surfaceElevated,
@@ -487,6 +523,110 @@ class _AiImportBottomSheetState extends State<AiImportBottomSheet> {
           ),
         ),
 
+        // Thông báo đặc biệt khi người dùng nhập ngữ cảnh không liên quan đến Calisthenics
+        if (_invalidContextReason != null) ...[
+          const SizedBox(height: 14),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.errorRed.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: AppColors.errorRed.withValues(alpha: 0.5),
+                width: 1.2,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: AppColors.errorRed.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        Icons.block_rounded,
+                        color: AppColors.errorRed,
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'NGỮ CẢNH KHÔNG LIÊN QUAN ĐẾN CALISTHENICS',
+                        style: AppTypography.labelMedium.copyWith(
+                          color: AppColors.errorRed,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  _invalidContextReason!,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.textWhite,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceElevated,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: AppColors.borderDark),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.lightbulb_outline_rounded,
+                            color: AppColors.prepareYellow,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Gợi ý ngữ cảnh đúng:',
+                            style: AppTypography.labelSmall.copyWith(
+                              color: AppColors.prepareYellow,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        '• Dán danh sách bài tập thô (VD: Hít đất 15 reps, Plank 45s, Squat 20 cái...)',
+                        style: AppTypography.bodySmall.copyWith(
+                          color: AppColors.textMuted,
+                          fontSize: 12,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '• Hoặc nhập yêu cầu giáo án Calisthenics (VD: "Tập ngực và tay sau 4 hiệp tại nhà", "Bài tập bụng Calisthenics 15 phút").',
+                        style: AppTypography.bodySmall.copyWith(
+                          color: AppColors.textMuted,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+
+        // Thông báo lỗi khác nếu có
         if (_errorMessage != null) ...[
           const SizedBox(height: 12),
           Container(
@@ -554,7 +694,7 @@ class _AiImportBottomSheetState extends State<AiImportBottomSheet> {
                       ),
                       const SizedBox(width: 12),
                       Text(
-                        'GEMINI ĐANG PHÂN TÍCH...',
+                        'AI ĐANG PHÂN TÍCH NGỮ CẢNH...',
                         style: AppTypography.labelLarge.copyWith(
                           color: Colors.black,
                           fontWeight: FontWeight.w900,
@@ -572,7 +712,7 @@ class _AiImportBottomSheetState extends State<AiImportBottomSheet> {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        'PHÂN TÍCH VĂN BẢN VỚI AI',
+                        'PHÂN TÍCH & TẠO BÀI TẬP VỚI AI',
                         style: AppTypography.labelLarge.copyWith(
                           color: Colors.black,
                           fontWeight: FontWeight.w900,
@@ -701,7 +841,7 @@ class _AiImportBottomSheetState extends State<AiImportBottomSheet> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'DANH SÁCH ĐỘNG TÁC TRÍCH XUẤT (${workout.exercises.length}):',
+              'DANH SÁCH ĐỘNG TÁC (${workout.exercises.length}):',
               style: AppTypography.labelSmall.copyWith(
                 color: AppColors.textMuted,
                 letterSpacing: 1.1,
@@ -742,7 +882,7 @@ class _AiImportBottomSheetState extends State<AiImportBottomSheet> {
                     width: 26,
                     height: 26,
                     alignment: Alignment.center,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: AppColors.borderDark,
                       shape: BoxShape.circle,
                     ),

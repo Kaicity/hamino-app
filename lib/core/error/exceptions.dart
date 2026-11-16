@@ -31,3 +31,15 @@ class DeviceHardwareException implements Exception {
   String toString() => 'DeviceHardwareException: $message ${cause != null ? '($cause)' : ''}';
 }
 
+/// Ngoại lệ ném ra khi nội dung người dùng cung cấp không hợp lệ hoặc không liên quan đến bài tập Calisthenics
+class InvalidWorkoutContextException implements Exception {
+  final String message;
+  final dynamic cause;
+
+  const InvalidWorkoutContextException(this.message, [this.cause]);
+
+  @override
+  String toString() => message;
+}
+
+
