@@ -6,17 +6,13 @@ import '../../../../core/services/gemini_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../data/models/ai_parsed_workout.dart';
-import '../../domain/entities/workout_category.dart';
 
 /// Bottom sheet thông minh cho phép người dùng dán danh sách bài tập thô,
 /// sử dụng Gemini API để phân tích tự động thành dữ liệu có cấu trúc.
 class AiImportBottomSheet extends StatefulWidget {
   final Function(AiParsedWorkout parsedWorkout) onApply;
 
-  const AiImportBottomSheet({
-    super.key,
-    required this.onApply,
-  });
+  const AiImportBottomSheet({super.key, required this.onApply});
 
   static Future<void> show(
     BuildContext context, {
@@ -133,15 +129,21 @@ class _AiImportBottomSheetState extends State<AiImportBottomSheet> {
           children: [
             Text(
               'Để AI phân tích tự động, ứng dụng cần Gemini API Key của Google (hoàn toàn miễn phí).',
-              style: AppTypography.bodySmall.copyWith(color: AppColors.textMuted),
+              style: AppTypography.bodySmall.copyWith(
+                color: AppColors.textMuted,
+              ),
             ),
             const SizedBox(height: 14),
             TextField(
               controller: apiKeyController,
-              style: AppTypography.bodyMedium.copyWith(color: AppColors.textWhite),
+              style: AppTypography.bodyMedium.copyWith(
+                color: AppColors.textWhite,
+              ),
               decoration: InputDecoration(
                 hintText: 'Dán Gemini API Key vào đây...',
-                hintStyle: AppTypography.bodyMedium.copyWith(color: AppColors.textDisabled),
+                hintStyle: AppTypography.bodyMedium.copyWith(
+                  color: AppColors.textDisabled,
+                ),
                 filled: true,
                 fillColor: AppColors.surfaceElevated,
                 border: OutlineInputBorder(
@@ -150,9 +152,15 @@ class _AiImportBottomSheetState extends State<AiImportBottomSheet> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(color: AppColors.workGreen, width: 1.5),
+                  borderSide: const BorderSide(
+                    color: AppColors.workGreen,
+                    width: 1.5,
+                  ),
                 ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
               ),
             ),
             const SizedBox(height: 10),
@@ -170,7 +178,9 @@ class _AiImportBottomSheetState extends State<AiImportBottomSheet> {
             onPressed: () => Navigator.of(ctx).pop(false),
             child: Text(
               'HỦY',
-              style: AppTypography.labelMedium.copyWith(color: AppColors.textMuted),
+              style: AppTypography.labelMedium.copyWith(
+                color: AppColors.textMuted,
+              ),
             ),
           ),
           ElevatedButton(
@@ -191,7 +201,9 @@ class _AiImportBottomSheetState extends State<AiImportBottomSheet> {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.workGreen,
               foregroundColor: Colors.black,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
             child: Text(
               'LƯU KEY',
@@ -279,14 +291,14 @@ class _AiImportBottomSheetState extends State<AiImportBottomSheet> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'NHẬP BÀI TẬP BẰNG AI',
+                          'TẠO BÀI TẬP VỚI AI HAMI',
                           style: AppTypography.headlineSmall.copyWith(
                             color: AppColors.textWhite,
                             fontWeight: FontWeight.w800,
                           ),
                         ),
                         Text(
-                          'Phân tích văn bản thô tự động với Gemini API',
+                          'Phân tích tạo bài tập từ văn bản',
                           style: AppTypography.bodySmall.copyWith(
                             color: AppColors.textMuted,
                           ),
@@ -306,7 +318,10 @@ class _AiImportBottomSheetState extends State<AiImportBottomSheet> {
                     onPressed: _showApiKeyDialog,
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close_rounded, color: AppColors.textMuted),
+                    icon: const Icon(
+                      Icons.close_rounded,
+                      color: AppColors.textMuted,
+                    ),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ],
@@ -318,7 +333,9 @@ class _AiImportBottomSheetState extends State<AiImportBottomSheet> {
             Flexible(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(20),
-                child: _parsedResult == null ? _buildInputView() : _buildPreviewView(),
+                child: _parsedResult == null
+                    ? _buildInputView()
+                    : _buildPreviewView(),
               ),
             ),
           ],
@@ -340,16 +357,24 @@ class _AiImportBottomSheetState extends State<AiImportBottomSheet> {
             decoration: BoxDecoration(
               color: AppColors.warningOrange.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.warningOrange.withValues(alpha: 0.4)),
+              border: Border.all(
+                color: AppColors.warningOrange.withValues(alpha: 0.4),
+              ),
             ),
             child: Row(
               children: [
-                const Icon(Icons.info_outline_rounded, color: AppColors.warningOrange, size: 20),
+                const Icon(
+                  Icons.info_outline_rounded,
+                  color: AppColors.warningOrange,
+                  size: 20,
+                ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     'Chưa thiết lập Gemini API Key. Nhấn để cài đặt trước khi phân tích.',
-                    style: AppTypography.bodySmall.copyWith(color: AppColors.warningOrange),
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.warningOrange,
+                    ),
                   ),
                 ),
                 TextButton(
@@ -381,7 +406,11 @@ class _AiImportBottomSheetState extends State<AiImportBottomSheet> {
               children: [
                 TextButton.icon(
                   onPressed: _pasteFromClipboard,
-                  icon: const Icon(Icons.content_paste_rounded, size: 14, color: AppColors.restBlue),
+                  icon: const Icon(
+                    Icons.content_paste_rounded,
+                    size: 14,
+                    color: AppColors.restBlue,
+                  ),
                   label: Text(
                     'Dán',
                     style: AppTypography.labelSmall.copyWith(
@@ -390,7 +419,10 @@ class _AiImportBottomSheetState extends State<AiImportBottomSheet> {
                     ),
                   ),
                   style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
@@ -398,7 +430,11 @@ class _AiImportBottomSheetState extends State<AiImportBottomSheet> {
                 const SizedBox(width: 8),
                 TextButton.icon(
                   onPressed: _loadSample,
-                  icon: const Icon(Icons.auto_fix_high_rounded, size: 14, color: AppColors.workGreen),
+                  icon: const Icon(
+                    Icons.auto_fix_high_rounded,
+                    size: 14,
+                    color: AppColors.workGreen,
+                  ),
                   label: Text(
                     'Ví dụ mẫu',
                     style: AppTypography.labelSmall.copyWith(
@@ -407,7 +443,10 @@ class _AiImportBottomSheetState extends State<AiImportBottomSheet> {
                     ),
                   ),
                   style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
@@ -439,7 +478,10 @@ class _AiImportBottomSheetState extends State<AiImportBottomSheet> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(color: AppColors.workGreen, width: 1.5),
+              borderSide: const BorderSide(
+                color: AppColors.workGreen,
+                width: 1.5,
+              ),
             ),
             contentPadding: const EdgeInsets.all(16),
           ),
@@ -452,16 +494,24 @@ class _AiImportBottomSheetState extends State<AiImportBottomSheet> {
             decoration: BoxDecoration(
               color: AppColors.errorRed.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: AppColors.errorRed.withValues(alpha: 0.3)),
+              border: Border.all(
+                color: AppColors.errorRed.withValues(alpha: 0.3),
+              ),
             ),
             child: Row(
               children: [
-                const Icon(Icons.error_outline_rounded, color: AppColors.errorRed, size: 18),
+                const Icon(
+                  Icons.error_outline_rounded,
+                  color: AppColors.errorRed,
+                  size: 18,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     _errorMessage!,
-                    style: AppTypography.bodySmall.copyWith(color: AppColors.errorRed),
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.errorRed,
+                    ),
                   ),
                 ),
               ],
@@ -480,8 +530,12 @@ class _AiImportBottomSheetState extends State<AiImportBottomSheet> {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.workGreen,
               foregroundColor: Colors.black,
-              disabledBackgroundColor: AppColors.workGreen.withValues(alpha: 0.5),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              disabledBackgroundColor: AppColors.workGreen.withValues(
+                alpha: 0.5,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
               elevation: 0,
             ),
             child: _isLoading
@@ -493,7 +547,9 @@ class _AiImportBottomSheetState extends State<AiImportBottomSheet> {
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2.5,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.black,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -509,7 +565,11 @@ class _AiImportBottomSheetState extends State<AiImportBottomSheet> {
                 : Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.bolt_rounded, size: 22, color: Colors.black),
+                      const Icon(
+                        Icons.bolt_rounded,
+                        size: 22,
+                        color: Colors.black,
+                      ),
                       const SizedBox(width: 8),
                       Text(
                         'PHÂN TÍCH VĂN BẢN VỚI AI',
@@ -540,7 +600,9 @@ class _AiImportBottomSheetState extends State<AiImportBottomSheet> {
           decoration: BoxDecoration(
             color: AppColors.surfaceElevated,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.workGreen.withValues(alpha: 0.4)),
+            border: Border.all(
+              color: AppColors.workGreen.withValues(alpha: 0.4),
+            ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -571,16 +633,26 @@ class _AiImportBottomSheetState extends State<AiImportBottomSheet> {
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: workout.category.color.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: workout.category.color, width: 1.2),
+                      border: Border.all(
+                        color: workout.category.color,
+                        width: 1.2,
+                      ),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(workout.category.icon, size: 14, color: workout.category.color),
+                        Icon(
+                          workout.category.icon,
+                          size: 14,
+                          color: workout.category.color,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           workout.category.displayName,
@@ -651,7 +723,7 @@ class _AiImportBottomSheetState extends State<AiImportBottomSheet> {
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: workout.exercises.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 8),
+          separatorBuilder: (_, _) => const SizedBox(height: 8),
           itemBuilder: (context, index) {
             final ex = workout.exercises[index];
             final isHold = ex.isHold;
@@ -711,14 +783,19 @@ class _AiImportBottomSheetState extends State<AiImportBottomSheet> {
                   const SizedBox(width: 8),
                   // Badge Reps hoặc Giây
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
                     decoration: BoxDecoration(
                       color: isHold
                           ? AppColors.prepareYellow.withValues(alpha: 0.15)
                           : AppColors.workGreen.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: isHold ? AppColors.prepareYellow : AppColors.workGreen,
+                        color: isHold
+                            ? AppColors.prepareYellow
+                            : AppColors.workGreen,
                         width: 1,
                       ),
                     ),
@@ -728,13 +805,19 @@ class _AiImportBottomSheetState extends State<AiImportBottomSheet> {
                         Icon(
                           isHold ? Icons.timer_outlined : Icons.repeat_rounded,
                           size: 13,
-                          color: isHold ? AppColors.prepareYellow : AppColors.workGreen,
+                          color: isHold
+                              ? AppColors.prepareYellow
+                              : AppColors.workGreen,
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          isHold ? '${ex.holdSeconds}s' : '${ex.defaultReps} reps',
+                          isHold
+                              ? '${ex.holdSeconds}s'
+                              : '${ex.defaultReps} reps',
                           style: AppTypography.labelSmall.copyWith(
-                            color: isHold ? AppColors.prepareYellow : AppColors.workGreen,
+                            color: isHold
+                                ? AppColors.prepareYellow
+                                : AppColors.workGreen,
                             fontWeight: FontWeight.w800,
                           ),
                         ),
@@ -763,7 +846,9 @@ class _AiImportBottomSheetState extends State<AiImportBottomSheet> {
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   side: const BorderSide(color: AppColors.borderDark),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
                 child: Text(
                   'NHẬP LẠI',
@@ -782,7 +867,11 @@ class _AiImportBottomSheetState extends State<AiImportBottomSheet> {
                   widget.onApply(workout);
                   Navigator.of(context).pop();
                 },
-                icon: const Icon(Icons.check_rounded, color: Colors.black, size: 20),
+                icon: const Icon(
+                  Icons.check_rounded,
+                  color: Colors.black,
+                  size: 20,
+                ),
                 label: Text(
                   'ÁP DỤNG VÀO GIÁO ÁN',
                   style: AppTypography.labelMedium.copyWith(
@@ -794,7 +883,9 @@ class _AiImportBottomSheetState extends State<AiImportBottomSheet> {
                   backgroundColor: AppColors.workGreen,
                   foregroundColor: Colors.black,
                   padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   elevation: 0,
                 ),
               ),
@@ -833,4 +924,3 @@ class _AiImportBottomSheetState extends State<AiImportBottomSheet> {
     );
   }
 }
-

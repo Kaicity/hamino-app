@@ -79,7 +79,7 @@ void main() {
         ],
       );
 
-      bloc.add(InitBuilderEvent(existing));
+      bloc.add(InitBuilderEvent(existingWorkout: existing));
 
       expect(bloc.stream, emits(predicate<WorkoutBuilderState>((state) {
         return state.editingId == 'existing-123' &&

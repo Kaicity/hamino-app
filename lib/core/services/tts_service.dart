@@ -14,6 +14,7 @@ class TtsService implements ITtsService {
   double _currentSpeechRate = 0.52;
   double _currentPitch = 1.0;
   double _currentVolume = 1.0;
+  @override
   bool isTtsEnabled = true;
 
   bool get isSpeaking => _isSpeaking;

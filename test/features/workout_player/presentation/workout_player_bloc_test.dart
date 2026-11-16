@@ -121,7 +121,7 @@ void main() {
       );
     });
 
-    test('AddRestTimeEvent extends rest duration', () async {
+    test('AddRestTimeEvent extends rest duration by 10s and 30s', () async {
       bloc.add(StartWorkoutEvent(sampleWorkout));
       await bloc.stream.firstWhere((s) => s is PlayerPrepare);
       bloc.add(const SkipNextEvent()); // to Work
@@ -130,11 +130,18 @@ void main() {
       await bloc.stream.firstWhere((s) => s is PlayerRest);
 
       bloc.add(const AddRestTimeEvent(10));
-
       await expectLater(
         bloc.stream,
         emits(predicate<PlayerRest>((state) {
           return state.remainingSeconds == 40;
+        })),
+      );
+
+      bloc.add(const AddRestTimeEvent(30));
+      await expectLater(
+        bloc.stream,
+        emits(predicate<PlayerRest>((state) {
+          return state.remainingSeconds == 70;
         })),
       );
     });

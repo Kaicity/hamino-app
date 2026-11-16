@@ -1,4 +1,5 @@
 import 'package:get_it/get_it.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../database/database_helper.dart';
 import '../services/audio_focus_service.dart';
@@ -16,6 +17,10 @@ import '../../features/history/data/datasources/history_local_datasource.dart';
 import '../../features/history/data/repositories/history_repository_impl.dart';
 import '../../features/history/domain/repositories/history_repository.dart';
 import '../../features/history/presentation/bloc/history_bloc.dart';
+import '../../features/settings/data/datasources/settings_local_datasource.dart';
+import '../../features/settings/data/repositories/settings_repository_impl.dart';
+import '../../features/settings/domain/repositories/settings_repository.dart';
+import '../../features/settings/presentation/bloc/settings_cubit.dart';
 import '../../features/workout_builder/data/repositories/workout_repository_impl.dart';
 import '../../features/workout_builder/domain/repositories/workout_repository.dart';
 import '../../features/workout_builder/presentation/bloc/workout_catalog_bloc.dart';
@@ -46,6 +51,10 @@ Future<void> initDependencies() async {
 
 /// Đăng ký các dịch vụ Core dùng chung
 Future<void> _initCore() async {
+  // Shared Preferences
+  final sharedPreferences = await SharedPreferences.getInstance();
+  sl.registerLazySingleton<SharedPreferences>(() => sharedPreferences);
+
   // Database SQLite
   sl.registerLazySingleton<DatabaseHelper>(() => DatabaseHelper());
 
@@ -55,7 +64,9 @@ Future<void> _initCore() async {
   sl.registerLazySingleton<AudioFocusService>(() => AudioFocusService());
 
   // Hardware & Background Services (Phase 5)
-  sl.registerLazySingleton<IWakelockService>(() => WakelockService());
+  sl.registerLazySingleton<IWakelockService>(
+    () => WakelockService(prefs: sl<SharedPreferences>()),
+  );
   sl.registerLazySingleton<INotificationService>(() => NotificationService());
 
   // AI & Smart Assistance (Gemini API)
@@ -105,6 +116,18 @@ Future<void> _initHistory() async {
 
 /// Đăng ký dependencies cho tính năng Settings (Cài đặt)
 Future<void> _initSettings() async {
-  // Sẽ được bổ sung tại Phase 6 (SettingsBloc)
+  sl.registerLazySingleton<SettingsLocalDataSource>(
+    () => SettingsLocalDataSourceImpl(sl<SharedPreferences>()),
+  );
+  sl.registerLazySingleton<SettingsRepository>(
+    () => SettingsRepositoryImpl(sl<SettingsLocalDataSource>()),
+  );
+  sl.registerFactory(
+    () => SettingsCubit(
+      repository: sl<SettingsRepository>(),
+      ttsService: sl<ITtsService>(),
+      audioService: sl<IAudioService>(),
+    ),
+  );
 }
 

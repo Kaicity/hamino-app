@@ -10,6 +10,7 @@ import '../widgets/empty_state_widget.dart';
 import '../widgets/workout_card.dart';
 import '../../../../features/workout_player/presentation/pages/workout_player_page.dart';
 import '../../../history/presentation/pages/history_page.dart';
+import '../../../settings/presentation/pages/settings_page.dart';
 import 'workout_builder_page.dart';
 import '../widgets/ai_import_bottom_sheet.dart';
 
@@ -305,7 +306,13 @@ class _WorkoutCatalogView extends StatelessWidget {
                       icon: const Icon(Icons.settings_outlined,
                           color: AppColors.textWhite),
                       tooltip: 'Cài đặt',
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const SettingsPage(),
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),

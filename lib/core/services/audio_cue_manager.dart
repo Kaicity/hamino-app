@@ -17,6 +17,7 @@ class AudioCueManager {
 
   bool isSfxEnabled = true;
   bool isTtsEnabled = true;
+  bool isAudioDuckingEnabled = true;
   String language = 'vi-VN';
   Duration defaultVoiceDelay = const Duration(milliseconds: 500);
 
@@ -238,17 +239,45 @@ class AudioCueManager {
     }
   }
 
+  /// Cập nhật cấu hình âm thanh từ Cài đặt
+  void applySettings({
+    bool? sfxEnabled,
+    bool? ttsEnabled,
+    bool? audioDuckingEnabled,
+    String? ttsLanguage,
+  }) {
+    if (sfxEnabled != null) {
+      isSfxEnabled = sfxEnabled;
+      audioService.isSoundEnabled = sfxEnabled;
+    }
+    if (ttsEnabled != null) {
+      isTtsEnabled = ttsEnabled;
+      ttsService.isTtsEnabled = ttsEnabled;
+    }
+    if (audioDuckingEnabled != null) {
+      isAudioDuckingEnabled = audioDuckingEnabled;
+    }
+    if (ttsLanguage != null) {
+      language = ttsLanguage;
+      ttsService.setLanguage(ttsLanguage);
+    }
+  }
+
   /// Nói với cơ chế Audio Focus Ducking: giảm nhạc nền, đọc khẩu lệnh, khôi phục nhạc nền
   Future<void> _speakWithFocus(String text) async {
     if (!isTtsEnabled || text.trim().isEmpty) return;
 
     try {
-      await audioFocusService?.activate();
+      if (isAudioDuckingEnabled) {
+        await audioFocusService?.activate();
+      }
       await ttsService.speak(text, awaitCompletion: true);
     } catch (e) {
       debugPrint('[AudioCueManager] Error speaking with focus: $e');
     } finally {
-      await audioFocusService?.deactivate();
+      if (isAudioDuckingEnabled) {
+        await audioFocusService?.deactivate();
+      }
     }
   }
 

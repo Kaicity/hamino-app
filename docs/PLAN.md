@@ -394,45 +394,45 @@
 | **TASK-6.4** | Hoàn thiện Tài liệu & Đóng gói | Cập nhật `README.md`, icon ứng dụng, splash screen, build release. | Ứng dụng sẵn sàng chạy mượt mà trên Android và iOS. | P2 |
 
 #### Checklist Chi Tiết Thực Hiện (Action Items)
-- [ ] **TASK-6.1: Xây dựng Màn hình Cài đặt Hệ thống (Settings Screen)**
-  - [ ] Tạo `SettingsCubit` và `SettingsState` lưu trữ trạng thái vào `SharedPreferences`.
-  - [ ] Nhóm Cài đặt Âm thanh & Huấn Luyện Viên:
-    - [ ] Switch: Bật / Tắt Giọng đọc Trợ lý ảo (TTS Voice Assistant).
-    - [ ] Lựa chọn ngôn ngữ: Radio chọn `Tiếng Việt` hoặc `English`.
-    - [ ] Slider: Tốc độ giọng đọc (Speech Rate) từ 0.3x đến 1.0x kèm nút "Nghe thử mẫu".
-    - [ ] Switch: Bật / Tắt Hiệu ứng âm thanh còi & tiếng bíp (SFX).
-    - [ ] Switch: Tự động giảm âm lượng nhạc ngoài (Audio Ducking).
-  - [ ] Nhóm Cài đặt Màn hình & Pin:
-    - [ ] Switch: Luôn sáng màn hình trong lúc tập (Wakelock).
-    - [ ] Lựa chọn thời gian đếm chuẩn bị mặc định (5s / 10s / 15s).
-  - [ ] Mục Giới thiệu: Hiển thị Phiên bản ứng dụng (`v1.0.0`), lời cảm ơn cộng đồng Calisthenics.
+- [x] **TASK-6.1: Xây dựng Màn hình Cài đặt Hệ thống (Settings Screen)**
+  - [x] Tạo `SettingsCubit` và `SettingsState` lưu trữ trạng thái vào `SharedPreferences`.
+  - [x] Nhóm Cài đặt Âm thanh & Huấn Luyện Viên:
+    - [x] Switch: Bật / Tắt Giọng đọc Trợ lý ảo (TTS Voice Assistant).
+    - [x] Lựa chọn ngôn ngữ: Radio chọn `Tiếng Việt` hoặc `English`.
+    - [x] Slider: Tốc độ giọng đọc (Speech Rate) từ 0.3x đến 1.0x kèm nút "Nghe thử mẫu".
+    - [x] Switch: Bật / Tắt Hiệu ứng âm thanh còi & tiếng bíp (SFX).
+    - [x] Switch: Tự động giảm âm lượng nhạc ngoài (Audio Ducking).
+  - [x] Nhóm Cài đặt Màn hình & Pin:
+    - [x] Switch: Luôn sáng màn hình trong lúc tập (Wakelock).
+    - [x] Lựa chọn thời gian đếm chuẩn bị mặc định (5s / 10s / 15s).
+  - [x] Mục Giới thiệu: Hiển thị Phiên bản ứng dụng (`v1.0.0`), lời cảm ơn cộng đồng Calisthenics.
 
-- [ ] **TASK-6.2: Viết Kiểm Thử Tự Động (Unit Test & BLoC Test)**
-  - [ ] Tạo `test/features/workout_player/precision_ticker_test.dart`:
+- [x] **TASK-6.2: Viết Kiểm Thử Tự Động (Unit Test & BLoC Test)**
+  - [x] Tạo `test/features/workout_player/precision_ticker_test.dart`:
     - Kiểm tra `PrecisionTicker` đếm đúng chu kỳ và không bị lệch thời gian khi delay luồng.
-  - [ ] Tạo `test/features/workout_player/workout_player_bloc_test.dart`:
+  - [x] Tạo `test/features/workout_player/workout_player_bloc_test.dart`:
     - Kiểm tra chu trình chuyển trạng thái: `Prepare` ➔ `Work` ➔ `Rest` ➔ `Completed`.
     - Kiểm tra sự kiện `Pause` và `Resume` không làm sai lệch số giây còn lại.
     - Kiểm tra sự kiện `AddRestTimeEvent` cộng thêm đúng 10s/30s vào thời gian nghỉ hiện tại.
-  - [ ] Tạo `test/features/workout_builder/workout_repository_test.dart`:
+  - [x] Tạo `test/features/workout_builder/workout_repository_test.dart`:
     - Kiểm tra các hàm CRUD thêm, sửa, xóa, lấy danh sách bài tập bằng cơ sở dữ liệu SQLite in-memory (`sqflite_common_ffi`).
 
-- [ ] **TASK-6.3: Tối ưu Hiệu Năng & Tiêu Thụ Pin (Battery & Performance Optimization)**
-  - [ ] Tối ưu hóa Rebuild cây Widget:
+- [x] **TASK-6.3: Tối ưu Hiệu Năng & Tiêu Thụ Pin (Battery & Performance Optimization)**
+  - [x] Tối ưu hóa Rebuild cây Widget:
     - Đặt `RepaintBoundary` bao quanh widget đồng hồ số.
     - Sử dụng `buildWhen` trong `BlocBuilder` để chỉ build lại duy nhất Text đồng hồ khi số giây thay đổi, giữ nguyên phần còn lại của giao diện.
-  - [ ] Quản lý bộ nhớ (Memory Leak Check):
+  - [x] Quản lý bộ nhớ (Memory Leak Check):
     - Kiểm tra toàn bộ `StreamSubscription`, `AnimationController`, `TextEditingController` được đóng trong `dispose()`.
-  - [ ] Đo lường hiệu năng bằng Flutter DevTools: Đảm bảo app duy trì 60 FPS mượt mà và mức sử dụng CPU tối thiểu.
+  - [x] Đo lường hiệu năng bằng Flutter DevTools: Đảm bảo app duy trì 60 FPS mượt mà và mức sử dụng CPU tối thiểu.
 
-- [ ] **TASK-6.4: Đóng Gói Ứng Dụng & Hoàn Thiện Tài Liệu Bàn Giao**
-  - [ ] Thiết kế và tạo Icon ứng dụng thể thao phong cách Calisthenics bằng `flutter_launcher_icons`.
-  - [ ] Cấu hình Splash Screen nền đen với logo Hamino bằng `flutter_native_splash`.
-  - [ ] Cập nhật toàn bộ `README.md` của dự án:
+- [x] **TASK-6.4: Đóng Gói Ứng Dụng & Hoàn Thiện Tài Liệu Bàn Giao**
+  - [x] Thiết kế và tạo Icon ứng dụng thể thao phong cách Calisthenics bằng `flutter_launcher_icons`.
+  - [x] Cấu hình Splash Screen nền đen với logo Hamino bằng `flutter_native_splash`.
+  - [x] Cập nhật toàn bộ `README.md` của dự án:
     - Giới thiệu tổng quan tính năng.
     - Hướng dẫn clone mã nguồn và chạy lệnh `flutter run`.
     - Hướng dẫn build Release APK (`flutter build apk --release`) và iOS Bundle.
-  - [ ] Bàn giao sản phẩm hoàn chỉnh theo đúng tiêu chuẩn đề ra trong `PRD.md` và `TECH_ARCHITECTURE.md`.
+  - [x] Bàn giao sản phẩm hoàn chỉnh theo đúng tiêu chuẩn đề ra trong `PRD.md` và `TECH_ARCHITECTURE.md`.
 
 ---
 

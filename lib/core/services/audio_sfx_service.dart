@@ -18,6 +18,7 @@ class AudioSfxService implements IAudioService {
   final AudioPlayer _fanfarePlayer;
 
   bool _isInitialized = false;
+  @override
   bool isSoundEnabled = true;
 
   AudioSfxService({

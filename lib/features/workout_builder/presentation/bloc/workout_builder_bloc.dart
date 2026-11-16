@@ -25,6 +25,7 @@ class InitBuilderEvent extends WorkoutBuilderEvent {
   final int? initialTargetRounds;
   final int? initialDefaultRestSeconds;
   final String? initialDescription;
+  final int? initialPrepareSeconds;
 
   const InitBuilderEvent({
     this.existingWorkout,
@@ -34,6 +35,7 @@ class InitBuilderEvent extends WorkoutBuilderEvent {
     this.initialTargetRounds,
     this.initialDefaultRestSeconds,
     this.initialDescription,
+    this.initialPrepareSeconds,
   });
 
   @override
@@ -45,6 +47,7 @@ class InitBuilderEvent extends WorkoutBuilderEvent {
         initialTargetRounds,
         initialDefaultRestSeconds,
         initialDescription,
+        initialPrepareSeconds,
       ];
 }
 
@@ -355,12 +358,15 @@ class WorkoutBuilderBloc extends Bloc<WorkoutBuilderEvent, WorkoutBuilderState> 
         name: event.initialName ?? '',
         category: event.initialCategory ?? WorkoutCategory.endurance,
         description: event.initialDescription,
+        prepareSeconds: event.initialPrepareSeconds ?? 10,
         targetRounds: event.initialTargetRounds ?? 1,
         defaultRestSeconds: event.initialDefaultRestSeconds ?? 60,
         exercises: List.from(event.initialExercises!),
       ));
     } else {
-      emit(const WorkoutBuilderState());
+      emit(WorkoutBuilderState(
+        prepareSeconds: event.initialPrepareSeconds ?? 10,
+      ));
     }
   }
 

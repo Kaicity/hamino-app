@@ -9,6 +9,9 @@ import 'package:hamino_app/features/workout_builder/domain/entities/workout_temp
 import 'package:hamino_app/features/workout_player/presentation/bloc/workout_player_state.dart';
 
 class FakeAudioService implements IAudioService {
+  @override
+  bool isSoundEnabled = true;
+
   int beepShortCalls = 0;
   int beepHighCalls = 0;
   int whistleStartCalls = 0;
@@ -63,6 +66,9 @@ class FakeAudioService implements IAudioService {
 }
 
 class FakeTtsService implements ITtsService {
+  @override
+  bool isTtsEnabled = true;
+
   final List<String> spokenTexts = [];
   int stopCalls = 0;
   String currentLang = 'vi-VN';

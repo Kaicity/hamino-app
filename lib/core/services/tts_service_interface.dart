@@ -1,5 +1,8 @@
 /// Giao diện dịch vụ trợ lý giọng đọc Text-to-Speech
 abstract class ITtsService {
+  bool get isTtsEnabled;
+  set isTtsEnabled(bool value);
+
   Future<void> initialize();
   Future<void> speak(String text, {bool awaitCompletion = false});
   Future<void> stop();

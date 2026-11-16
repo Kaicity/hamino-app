@@ -17,6 +17,9 @@ class MockWorkoutRepository implements WorkoutRepository {
   Future<List<WorkoutTemplateEntity>> getAllWorkouts() async => [];
 
   @override
+  Future<List<WorkoutTemplateEntity>> getWorkoutsByCategory(WorkoutCategory category) async => [];
+
+  @override
   Future<WorkoutTemplateEntity?> getWorkoutById(String id) async => null;
 
   @override
@@ -29,11 +32,6 @@ class MockWorkoutRepository implements WorkoutRepository {
 
   @override
   Future<void> toggleFavorite(String id, bool isFavorite) async {}
-
-  @override
-  Future<WorkoutTemplateEntity> duplicateWorkout(String id) async {
-    throw UnimplementedError();
-  }
 }
 
 void main() {
@@ -123,7 +121,11 @@ void main() {
       final mockClient = MockClient((request) async {
         expect(request.url.host, 'generativelanguage.googleapis.com');
         expect(request.url.queryParameters['key'], 'test-api-key');
-        return http.Response(jsonEncode(mockApiResponse), 200);
+        return http.Response(
+          jsonEncode(mockApiResponse),
+          200,
+          headers: {'content-type': 'application/json; charset=utf-8'},
+        );
       });
 
       final service = GeminiService(client: mockClient);
@@ -162,7 +164,11 @@ void main() {
       };
 
       final mockClient = MockClient((request) async {
-        return http.Response(jsonEncode(mockApiResponse), 200);
+        return http.Response(
+          jsonEncode(mockApiResponse),
+          200,
+          headers: {'content-type': 'application/json; charset=utf-8'},
+        );
       });
 
       final service = GeminiService(client: mockClient);

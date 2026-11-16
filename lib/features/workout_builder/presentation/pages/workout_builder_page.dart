@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
 import '../bloc/workout_builder_bloc.dart';
@@ -45,7 +46,11 @@ class WorkoutBuilderPage extends StatelessWidget {
             ),
           );
         } else {
-          bloc.add(const InitBuilderEvent());
+          int defaultPrep = 10;
+          if (sl.isRegistered<SharedPreferences>()) {
+            defaultPrep = sl<SharedPreferences>().getInt('pref_default_prepare_seconds') ?? 10;
+          }
+          bloc.add(InitBuilderEvent(initialPrepareSeconds: defaultPrep));
         }
         return bloc;
       },

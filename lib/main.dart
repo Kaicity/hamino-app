@@ -3,9 +3,12 @@ import 'package:flutter/services.dart';
 
 import 'core/constants/app_constants.dart';
 import 'core/di/injection_container.dart';
+import 'core/services/audio_service_interface.dart';
+import 'core/services/tts_service_interface.dart';
 import 'core/theme/app_colors.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/app_typography.dart';
+import 'features/settings/domain/repositories/settings_repository.dart';
 import 'features/workout_builder/domain/entities/workout_category.dart';
 import 'features/workout_builder/domain/entities/workout_template_entity.dart';
 import 'features/workout_builder/domain/repositories/workout_repository.dart';
@@ -32,6 +35,18 @@ void main() async {
 
   // Khởi tạo Dependency Injection (Service Locator)
   await initDependencies();
+
+  // Đồng bộ cấu hình người dùng vào các dịch vụ Audio & TTS
+  try {
+    final settings = await sl<SettingsRepository>().getSettings();
+    final tts = sl<ITtsService>();
+    tts.isTtsEnabled = settings.isTtsEnabled;
+    await tts.setLanguage(settings.ttsLanguage);
+    await tts.setSpeechRate(settings.speechRate);
+    sl<IAudioService>().isSoundEnabled = settings.isSfxEnabled;
+  } catch (e) {
+    debugPrint('Error syncing initial settings: $e');
+  }
 
   runApp(const HaminoApp());
 }

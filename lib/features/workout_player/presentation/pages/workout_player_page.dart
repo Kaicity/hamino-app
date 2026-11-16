@@ -13,6 +13,7 @@ import '../../../../core/utils/time_formatter.dart';
 import '../../../../features/workout_builder/domain/entities/workout_category.dart';
 import '../../../../features/workout_builder/domain/entities/workout_template_entity.dart';
 import '../../../history/presentation/pages/workout_summary_page.dart';
+import '../../../settings/domain/repositories/settings_repository.dart';
 import '../bloc/workout_player_bloc.dart';
 import '../bloc/workout_player_event.dart';
 import '../bloc/workout_player_state.dart';
@@ -70,11 +71,31 @@ class _WorkoutPlayerViewState extends State<_WorkoutPlayerView>
       _audioCueManager = sl<AudioCueManager>();
     } else {
       _audioCueManager = AudioCueManager(
-        audioService: const _NoOpAudioService(),
-        ttsService: const _NoOpTtsService(),
+        audioService: _NoOpAudioService(),
+        ttsService: _NoOpTtsService(),
       );
     }
     _audioCueManager.initialize();
+    _loadAndApplySettings();
+  }
+
+  Future<void> _loadAndApplySettings() async {
+    if (sl.isRegistered<SettingsRepository>()) {
+      try {
+        final settings = await sl<SettingsRepository>().getSettings();
+        if (mounted) {
+          _audioCueManager.applySettings(
+            sfxEnabled: settings.isSfxEnabled,
+            ttsEnabled: settings.isTtsEnabled,
+            audioDuckingEnabled: settings.isAudioDuckingEnabled,
+            ttsLanguage: settings.ttsLanguage,
+          );
+          setState(() {});
+        }
+      } catch (e) {
+        debugPrint('[WorkoutPlayer] Error loading settings: $e');
+      }
+    }
   }
 
   @override
@@ -253,33 +274,18 @@ class _WorkoutPlayerViewState extends State<_WorkoutPlayerView>
     return '';
   }
 
-  String _getTimerDisplay(WorkoutPlayerState state) {
-    if (state is PlayerPrepare) {
-      return TimeFormatter.formatSeconds(state.remainingSeconds);
-    }
-    if (state is PlayerWork) {
-      final isHold = state.currentExercise?.isStaticHold ?? false;
-      return isHold
-          ? TimeFormatter.formatSeconds(state.remainingSeconds)
-          : TimeFormatter.formatSeconds(state.elapsedSeconds);
-    }
-    if (state is PlayerRest) {
-      return TimeFormatter.formatSeconds(state.remainingSeconds);
-    }
-    if (state is PlayerPaused) {
-      final prev = state.previousState;
-      if (prev is PlayerWork &&
-          !(prev.currentExercise?.isStaticHold ?? false)) {
-        return TimeFormatter.formatSeconds(prev.elapsedSeconds);
-      }
-      return TimeFormatter.formatSeconds(prev.remainingSeconds);
-    }
-    return '00:00';
-  }
-
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<WorkoutPlayerBloc, WorkoutPlayerState>(
+      buildWhen: (previous, current) {
+        if (current is PlayerCompleted || previous is PlayerCompleted) return true;
+        if (previous.runtimeType != current.runtimeType) return true;
+        if (previous.currentRound != current.currentRound) return true;
+        if (previous.currentExerciseIndex != current.currentExerciseIndex) return true;
+        if (previous.isScreenLocked != current.isScreenLocked) return true;
+        if (previous.workout?.id != current.workout?.id) return true;
+        return false;
+      },
       listener: (context, state) {
         _audioCueManager.handleState(state);
         if (_isInBackground) {
@@ -308,7 +314,6 @@ class _WorkoutPlayerViewState extends State<_WorkoutPlayerView>
         final bgColor = _getBackgroundColor(state);
         final accentColor = _getAccentColor(state);
         final statusLabel = _getStatusLabel(state);
-        final timerText = _getTimerDisplay(state);
         final currentEx = state.currentExercise;
 
         return PopScope(
@@ -414,13 +419,8 @@ class _WorkoutPlayerViewState extends State<_WorkoutPlayerView>
 
                       const SizedBox(height: 8),
 
-                      // Overall Progress Bar
-                      if (state.workout != null)
-                        WorkoutProgressBar(
-                          workout: state.workout!,
-                          totalElapsedSeconds: state.totalElapsedSeconds,
-                          progress: state.overallProgress,
-                        ),
+                      // Overall Progress Bar - Optimized Rebuild
+                      const _OptimizedProgressBar(),
 
                       const Spacer(),
 
@@ -452,20 +452,8 @@ class _WorkoutPlayerViewState extends State<_WorkoutPlayerView>
 
                       const SizedBox(height: 12),
 
-                      // Giant Timer Display (90sp+ Monospace)
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 24),
-                          child: Text(
-                            timerText,
-                            style: AppTypography.timerBigDisplay.copyWith(
-                              color: AppColors.textWhite,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
+                      // Giant Timer Display (90sp+ Monospace) - Optimized Rebuild & RepaintBoundary
+                      const _OptimizedGiantTimer(),
 
                       const SizedBox(height: 12),
 
@@ -702,7 +690,10 @@ class _WorkoutPlayerViewState extends State<_WorkoutPlayerView>
 }
 
 class _NoOpAudioService implements IAudioService {
-  const _NoOpAudioService();
+  @override
+  bool isSoundEnabled = true;
+
+  _NoOpAudioService();
 
   @override
   Future<void> initialize() async {}
@@ -725,7 +716,10 @@ class _NoOpAudioService implements IAudioService {
 }
 
 class _NoOpTtsService implements ITtsService {
-  const _NoOpTtsService();
+  @override
+  bool isTtsEnabled = true;
+
+  _NoOpTtsService();
 
   @override
   Future<void> initialize() async {}
@@ -767,4 +761,85 @@ class _NoOpNotificationService implements INotificationService {
   }) async {}
   @override
   Future<void> cancelWorkoutNotification() async {}
+}
+
+/// Widget thanh tiến độ được tối ưu hóa chỉ rebuild khi số giây tổng hoặc % tiến độ thay đổi
+class _OptimizedProgressBar extends StatelessWidget {
+  const _OptimizedProgressBar();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<WorkoutPlayerBloc, WorkoutPlayerState>(
+      buildWhen: (previous, current) {
+        return previous.totalElapsedSeconds != current.totalElapsedSeconds ||
+            previous.overallProgress != current.overallProgress ||
+            previous.workout != current.workout;
+      },
+      builder: (context, state) {
+        if (state.workout == null) return const SizedBox.shrink();
+        return WorkoutProgressBar(
+          workout: state.workout!,
+          totalElapsedSeconds: state.totalElapsedSeconds,
+          progress: state.overallProgress,
+        );
+      },
+    );
+  }
+}
+
+/// Widget hiển thị số giây đếm ngược lớn được tối ưu hóa chỉ rebuild khi timer text thay đổi
+/// Đặt trong [RepaintBoundary] để cô lập hoàn toàn render pipeline của canvas
+class _OptimizedGiantTimer extends StatelessWidget {
+  const _OptimizedGiantTimer();
+
+  static String _formatTimerDisplay(WorkoutPlayerState state) {
+    if (state is PlayerPrepare) {
+      return TimeFormatter.formatSeconds(state.remainingSeconds);
+    }
+    if (state is PlayerWork) {
+      final isHold = state.currentExercise?.isStaticHold ?? false;
+      return isHold
+          ? TimeFormatter.formatSeconds(state.remainingSeconds)
+          : TimeFormatter.formatSeconds(state.elapsedSeconds);
+    }
+    if (state is PlayerRest) {
+      return TimeFormatter.formatSeconds(state.remainingSeconds);
+    }
+    if (state is PlayerPaused) {
+      final prev = state.previousState;
+      if (prev is PlayerWork &&
+          !(prev.currentExercise?.isStaticHold ?? false)) {
+        return TimeFormatter.formatSeconds(prev.elapsedSeconds);
+      }
+      return TimeFormatter.formatSeconds(prev.remainingSeconds);
+    }
+    return '00:00';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<WorkoutPlayerBloc, WorkoutPlayerState>(
+      buildWhen: (previous, current) {
+        return _formatTimerDisplay(previous) != _formatTimerDisplay(current);
+      },
+      builder: (context, state) {
+        final timerText = _formatTimerDisplay(state);
+        return RepaintBoundary(
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Text(
+                timerText,
+                style: AppTypography.timerBigDisplay.copyWith(
+                  color: AppColors.textWhite,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
 }
